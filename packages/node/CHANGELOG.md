@@ -6,5 +6,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.10.0] - 2023-09-12
-[2.10.0]: https://github.com/subquery/subql-stellar/tag/v2.10.0
+## [2.12.5] - 2023-09-12
+[2.12.5]: https://github.com/subquery/subql-stellar/tag/v2.12.5
