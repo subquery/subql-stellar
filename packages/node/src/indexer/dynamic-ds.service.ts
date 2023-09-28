@@ -32,8 +32,8 @@ export class DynamicDsService extends BaseDynamicDsService<StellarProjectDs> {
   protected async getDatasource(
     params: DatasourceParams,
   ): Promise<StellarProjectDs> {
-    const template = cloneDeep(
-      this.project.templates?.find((t) => t.name === params.templateName),
+    const { name, ...template } = cloneDeep(
+      this.project.templates.find((t) => t.name === params.templateName),
     );
 
     if (!template) {

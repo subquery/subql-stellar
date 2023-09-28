@@ -1,6 +1,15 @@
 // Copyright 2020-2023 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
+import {
+  BaseTemplateDataSource,
+  IProjectNetworkConfig,
+  CommonSubqueryProject,
+  DictionaryQueryEntry,
+  FileReference,
+  Processor,
+  ProjectManifestV1_0_0,
+} from '@subql/types-core';
 import {ApiWrapper} from './interfaces';
 import {
   StellarBlock,
@@ -14,6 +23,11 @@ import {
   StellarTransaction,
   StellarTransactionFilter,
 } from './stellar';
+
+export type RuntimeDatasourceTemplate = BaseTemplateDataSource<SubqlRuntimeDatasource>;
+export type CustomDatasourceTemplate = BaseTemplateDataSource<SubqlCustomDatasource>;
+
+export type StellarProjectManifestV1_0_0 = ProjectManifestV1_0_0<SubqlRuntimeDatasource | SubqlCustomDatasource>;
 
 export enum StellarDatasourceKind {
   Runtime = 'stellar/Runtime',
@@ -45,21 +59,6 @@ type StellarRuntimeFilterMap = {
   [StellarHandlerKind.Effects]: StellarEffectFilter;
   [StellarHandlerKind.Event]: SorobanEventFilter;
 };
-
-export interface ProjectManifest {
-  specVersion: string;
-  description: string;
-  repository: string;
-
-  schema: string;
-
-  network: {
-    endpoint: string | string[];
-  };
-
-  dataSources: SubqlDatasource[];
-  bypassBlocks?: number[];
-}
 
 export interface SubqlBlockHandler {
   handler: string;
@@ -150,13 +149,7 @@ export interface SubqlNetworkFilter {
 
 export type SubqlDatasource = SubqlRuntimeDatasource | SubqlCustomDatasource;
 
-export interface FileReference {
-  file: string;
-}
-
 export type CustomDataSourceAsset = FileReference;
-
-export type Processor<O = any> = FileReference & {options?: O};
 
 export interface SubqlCustomDatasource<
   K extends string = string,
@@ -179,7 +172,7 @@ export interface HandlerInputTransformer_0_0_0<
 
 export interface HandlerInputTransformer_1_0_0<
   T extends StellarHandlerKind,
-  F,
+  F extends Record<string, unknown>,
   E,
   DS extends SubqlCustomDatasource = SubqlCustomDatasource
 > {
@@ -189,23 +182,12 @@ export interface HandlerInputTransformer_1_0_0<
     filter?: F;
     api: ApiWrapper;
     assets?: Record<string, string>;
-  }): Promise<E[]>; //  | SubstrateBuiltinDataSource
-}
-
-export interface DictionaryQueryCondition {
-  field: string;
-  value: string | string[];
-  matcher?: string;
-}
-
-export interface DictionaryQueryEntry {
-  entity: string;
-  conditions: DictionaryQueryCondition[];
+  }): Promise<F[]>; //  | SubstrateBuiltinDataSource
 }
 
 export type SecondLayerHandlerProcessorArray<
   K extends string,
-  F,
+  F extends Record<string, unknown>,
   T,
   DS extends SubqlCustomDatasource<K> = SubqlCustomDatasource<K>
 > =
@@ -217,7 +199,7 @@ export type SecondLayerHandlerProcessorArray<
 
 export interface SubqlDatasourceProcessor<
   K extends string,
-  F,
+  F extends Record<string, unknown>,
   DS extends SubqlCustomDatasource<K> = SubqlCustomDatasource<K>,
   P extends Record<string, SecondLayerHandlerProcessorArray<K, F, any, DS>> = Record<
     string,
@@ -232,7 +214,7 @@ export interface SubqlDatasourceProcessor<
 
 interface SecondLayerHandlerProcessorBase<
   K extends StellarHandlerKind,
-  F,
+  F extends Record<string, unknown>,
   DS extends SubqlCustomDatasource = SubqlCustomDatasource
 > {
   baseHandlerKind: K;
@@ -243,18 +225,18 @@ interface SecondLayerHandlerProcessorBase<
 
 export interface SecondLayerHandlerProcessor_0_0_0<
   K extends StellarHandlerKind,
-  F,
+  F extends Record<string, unknown>,
   E,
   DS extends SubqlCustomDatasource = SubqlCustomDatasource
 > extends SecondLayerHandlerProcessorBase<K, F, DS> {
   specVersion: undefined;
-  transformer: HandlerInputTransformer_0_0_0<K, E, DS>;
+  transformer: HandlerInputTransformer_0_0_0<K, F, DS>;
   filterProcessor: (filter: F | undefined, input: StellarRuntimeHandlerInputMap[K], ds: DS) => boolean;
 }
 
 export interface SecondLayerHandlerProcessor_1_0_0<
   K extends StellarHandlerKind,
-  F,
+  F extends Record<string, unknown>,
   E,
   DS extends SubqlCustomDatasource = SubqlCustomDatasource
 > extends SecondLayerHandlerProcessorBase<K, F, DS> {
@@ -265,7 +247,17 @@ export interface SecondLayerHandlerProcessor_1_0_0<
 
 export type SecondLayerHandlerProcessor<
   K extends StellarHandlerKind,
-  F,
+  F extends Record<string, unknown>,
   E,
   DS extends SubqlCustomDatasource = SubqlCustomDatasource
 > = SecondLayerHandlerProcessor_0_0_0<K, F, E, DS> | SecondLayerHandlerProcessor_1_0_0<K, F, E, DS>;
+
+export type StellarNetworkConfig = IProjectNetworkConfig & {
+  sorobanEndpoint?: string;
+};
+
+export type StellarProject<DS extends SubqlDatasource = SubqlRuntimeDatasource> = CommonSubqueryProject<
+  StellarNetworkConfig,
+  SubqlRuntimeDatasource | DS,
+  BaseTemplateDataSource<SubqlRuntimeDatasource> | BaseTemplateDataSource<DS>
+>;

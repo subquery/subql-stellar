@@ -3,12 +3,7 @@
 
 import assert from 'assert';
 import { Injectable } from '@nestjs/common';
-import {
-  ParentProject,
-  Reader,
-  RunnerSpecs,
-  validateSemver,
-} from '@subql/common';
+import { validateSemver } from '@subql/common';
 import {
   StellarProjectNetworkConfig,
   parseStellarProjectManifest,
@@ -17,8 +12,6 @@ import {
   isCustomDs,
   StellarHandlerKind,
   isRuntimeDs,
-  RuntimeDatasourceTemplate,
-  CustomDatasourceTemplate,
 } from '@subql/common-stellar';
 import {
   insertBlockFiltersCronSchedules,
@@ -27,6 +20,11 @@ import {
   SubqlProjectDs,
   updateDataSourcesV1_0_0,
 } from '@subql/node-core';
+import { ParentProject, Reader, RunnerSpecs } from '@subql/types-core';
+import {
+  CustomDatasourceTemplate,
+  RuntimeDatasourceTemplate,
+} from '@subql/types-stellar';
 import { buildSchemaFromString } from '@subql/utils';
 import { GraphQLSchema } from 'graphql';
 

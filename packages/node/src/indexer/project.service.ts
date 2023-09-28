@@ -10,8 +10,6 @@ import {
   NodeConfig,
   ApiService,
   IProjectUpgradeService,
-  IProjectNetworkConfig,
-  ISubqueryProject,
 } from '@subql/node-core';
 import { StellarBlockWrapper } from '@subql/types-stellar';
 import { Sequelize } from '@subql/x-sequelize';
@@ -75,14 +73,7 @@ export class ProjectService extends BaseProjectService<
     return new Date((block as unknown as ServerApi.LedgerRecord).closed_at); // TODO test and make sure its in MS not S
   }
 
-  protected onProjectChange(
-    project: ISubqueryProject<
-      IProjectNetworkConfig,
-      StellarProjectDs,
-      unknown,
-      unknown
-    >,
-  ): void | Promise<void> {
+  protected onProjectChange(project: SubqueryProject): void | Promise<void> {
     // TODO update this when implementing skipBlock feature for Eth
     // this.apiService.updateBlockFetching();
   }

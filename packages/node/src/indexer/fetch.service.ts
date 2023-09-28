@@ -18,13 +18,15 @@ import {
   getModulos,
 } from '@subql/node-core';
 import {
+  DictionaryQueryEntry,
+  DictionaryQueryCondition,
+} from '@subql/types-core';
+import {
   SorobanEventFilter,
   StellarEffectFilter,
   StellarOperationFilter,
   StellarTransactionFilter,
   SubqlDatasource,
-  DictionaryQueryCondition,
-  DictionaryQueryEntry,
 } from '@subql/types-stellar';
 import { groupBy, partition, sortBy, uniqBy } from 'lodash';
 import { SubqueryProject } from '../configure/SubqueryProject';

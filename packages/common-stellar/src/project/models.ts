@@ -1,7 +1,8 @@
 // Copyright 2020-2023 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import {forbidNonWhitelisted} from '@subql/common';
+import {forbidNonWhitelisted, ProcessorImpl} from '@subql/common';
+import {Processor, FileReference} from '@subql/types-core';
 import {
   StellarHandlerKind,
   StellarDatasourceKind,
@@ -12,7 +13,6 @@ import {
   SubqlRuntimeHandler,
   SubqlRuntimeDatasource,
   SubqlCustomDatasource,
-  FileReference,
   CustomDataSourceAsset,
   StellarBlockFilter,
   StellarTransactionFilter,
@@ -221,8 +221,8 @@ export class FileReferenceImpl implements FileReference {
   file: string;
 }
 
-export class CustomDataSourceBase<K extends string, M extends SubqlMapping = SubqlMapping<SubqlCustomHandler>>
-  implements SubqlCustomDatasource<K, M>
+export class CustomDataSourceBase<K extends string, M extends SubqlMapping = SubqlMapping<SubqlCustomHandler>, O = any>
+  implements SubqlCustomDatasource<K, M, O>
 {
   @IsString()
   kind: K;
@@ -235,9 +235,9 @@ export class CustomDataSourceBase<K extends string, M extends SubqlMapping = Sub
   @Type(() => FileReferenceImpl)
   @ValidateNested({each: true})
   assets: Map<string, CustomDataSourceAsset>;
-  @Type(() => FileReferenceImpl)
+  @Type(() => ProcessorImpl)
   @IsObject()
-  processor: FileReference;
+  processor: Processor<O>;
   @IsOptional()
   @ValidateNested()
   options?: StellarProcessorOptions;

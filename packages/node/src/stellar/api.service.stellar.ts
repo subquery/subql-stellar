@@ -3,7 +3,7 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ProjectNetworkV1_0_0 } from '@subql/common-stellar';
+import { StellarProjectNetwork } from '@subql/common-stellar';
 import {
   ApiService,
   ConnectionPoolService,
@@ -36,66 +36,36 @@ export class StellarApiService extends ApiService<
     super(connectionPoolService, eventEmitter);
   }
 
-  networkMeta: NetworkMetadataPayload;
-
   async init(): Promise<StellarApiService> {
+    let network: StellarProjectNetwork;
     try {
-      let network: ProjectNetworkV1_0_0;
-      try {
-        network = this.project.network;
-      } catch (e) {
-        logger.error(Object.keys(e));
-        process.exit(1);
-      }
+      network = this.project.network;
+    } catch (e) {
+      logger.error(Object.keys(e));
+      process.exit(1);
+    }
 
-      const sorobanClient = network.soroban
-        ? new SorobanServer(network.soroban)
-        : undefined;
+    const sorobanClient = network.soroban
+      ? new SorobanServer(network.soroban)
+      : undefined;
 
-      const endpoints = Array.isArray(network.endpoint)
-        ? network.endpoint
-        : [network.endpoint];
-
-      const endpointToApiIndex: Record<string, StellarApiConnection> = {};
-
-      for await (const [i, endpoint] of endpoints.entries()) {
-        const connection = await StellarApiConnection.create(
+    await this.createConnections(
+      network,
+      (endpoint) =>
+        StellarApiConnection.create(
           endpoint,
           this.fetchBlockBatches,
           this.eventEmitter,
           sorobanClient,
-        );
-
+        ),
+      //eslint-disable-next-line @typescript-eslint/require-await
+      async (connection: StellarApiConnection) => {
         const api = connection.unsafeApi;
+        return api.getChainId();
+      },
+    );
 
-        this.eventEmitter.emit(IndexerEvent.ApiConnected, {
-          value: 1,
-          apiIndex: i,
-          endpoint: endpoint,
-        });
-
-        if (!this.networkMeta) {
-          this.networkMeta = connection.networkMeta;
-        }
-
-        if (network.chainId !== api.getChainId().toString()) {
-          throw this.metadataMismatchError(
-            'ChainId',
-            network.chainId,
-            api.getChainId().toString(),
-          );
-        }
-
-        endpointToApiIndex[endpoint] = connection;
-      }
-
-      this.connectionPoolService.addBatchToConnections(endpointToApiIndex);
-
-      return this;
-    } catch (e) {
-      logger.error(e, 'Failed to init api service');
-      throw e;
-    }
+    return this;
   }
 
   get api(): StellarApi {
