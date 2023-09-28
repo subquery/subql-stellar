@@ -8,6 +8,6 @@ export interface RuntimeDatasourceTemplate extends Omit<SubqlRuntimeDatasource, 
 export interface CustomDatasourceTemplate extends Omit<SubqlCustomDatasource, 'name'>, TemplateBase {}
 
 export type StellarProjectManifestV1_0_0 = ProjectManifestV1_0_0<
-  RuntimeDatasourceTemplate | CustomDatasourceTemplate,
-  SubqlRuntimeDatasource | SubqlCustomDatasource
+  SubqlRuntimeDatasource | SubqlCustomDatasource,
+  RuntimeDatasourceTemplate | CustomDatasourceTemplate
 >;

@@ -5,19 +5,24 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   PoiService,
-  MmrService,
   BaseProjectService,
   StoreService,
   NodeConfig,
   ApiService,
-  MmrQueryService,
+  IProjectUpgradeService,
+  IProjectNetworkConfig,
+  ISubqueryProject,
 } from '@subql/node-core';
+import { StellarBlockWrapper } from '@subql/types-stellar';
 import { Sequelize } from '@subql/x-sequelize';
+import { ServerApi } from 'stellar-sdk';
 import {
   //  generateTimestampReferenceForBlockFilters,
-  SubqlProjectDs,
+  StellarProjectDs,
   SubqueryProject,
 } from '../configure/SubqueryProject';
+import { StellarApi } from '../stellar';
+import SafeStellarProvider from '../stellar/safe-api';
 import { DsProcessorService } from './ds-processor.service';
 import { DynamicDsService } from './dynamic-ds.service';
 import { UnfinalizedBlocksService } from './unfinalizedBlocks.service';
@@ -27,8 +32,8 @@ const { version: packageVersion } = require('../../package.json');
 
 @Injectable()
 export class ProjectService extends BaseProjectService<
-  ApiService,
-  SubqlProjectDs
+  ApiService<StellarApi, SafeStellarProvider, StellarBlockWrapper[]>,
+  StellarProjectDs
 > {
   protected packageVersion = packageVersion;
 
@@ -36,10 +41,10 @@ export class ProjectService extends BaseProjectService<
     dsProcessorService: DsProcessorService,
     apiService: ApiService,
     poiService: PoiService,
-    mmrService: MmrService,
-    mmrQueryService: MmrQueryService,
     sequelize: Sequelize,
     @Inject('ISubqueryProject') project: SubqueryProject,
+    @Inject('IProjectUpgradeService')
+    protected readonly projectUpgradeService: IProjectUpgradeService<SubqueryProject>,
     storeService: StoreService,
     nodeConfig: NodeConfig,
     dynamicDsService: DynamicDsService,
@@ -50,10 +55,9 @@ export class ProjectService extends BaseProjectService<
       dsProcessorService,
       apiService,
       poiService,
-      mmrService,
-      mmrQueryService,
       sequelize,
       project,
+      projectUpgradeService,
       storeService,
       nodeConfig,
       dynamicDsService,
@@ -62,16 +66,24 @@ export class ProjectService extends BaseProjectService<
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
-  protected async generateTimestampReferenceForBlockFilters(
-    ds: SubqlProjectDs[],
-  ): Promise<SubqlProjectDs[]> {
-    //throw new Error('Block filters not implemented yet');
-    return Promise.resolve(ds);
-    //return generateTimestampReferenceForBlockFilters(ds, this.apiService.api);
+  protected async getBlockTimestamp(height: number): Promise<Date> {
+    const block = await this.apiService.unsafeApi.api
+      .ledgers()
+      .ledger(height)
+      .call();
+
+    return new Date((block as unknown as ServerApi.LedgerRecord).closed_at); // TODO test and make sure its in MS not S
   }
 
-  protected getStartBlockDatasources(): SubqlProjectDs[] {
-    return this.project.dataSources;
+  protected onProjectChange(
+    project: ISubqueryProject<
+      IProjectNetworkConfig,
+      StellarProjectDs,
+      unknown,
+      unknown
+    >,
+  ): void | Promise<void> {
+    // TODO update this when implementing skipBlock feature for Eth
+    // this.apiService.updateBlockFetching();
   }
 }

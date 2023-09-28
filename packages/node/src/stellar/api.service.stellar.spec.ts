@@ -31,7 +31,7 @@ export function testSubqueryProject(
     root: './',
     schema: new GraphQLSchema({}),
     templates: [],
-  };
+  } as unknown as SubqueryProject;
 }
 
 export const prepareApiService = async (
@@ -97,7 +97,11 @@ describe('StellarApiService', () => {
     };
 
     await expect(
-      prepareApiService(HTTP_ENDPOINT, SOROBAN_ENDPOINT, faultyProject),
+      prepareApiService(
+        HTTP_ENDPOINT,
+        SOROBAN_ENDPOINT,
+        faultyProject as unknown as SubqueryProject,
+      ),
     ).rejects.toThrow();
   });
 

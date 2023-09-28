@@ -26,14 +26,14 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 export class StellarApiService extends ApiService<
   StellarApi,
   SafeStellarProvider,
-  StellarBlockWrapper
+  StellarBlockWrapper[]
 > {
   constructor(
     @Inject('ISubqueryProject') private project: SubqueryProject,
     connectionPoolService: ConnectionPoolService<StellarApiConnection>,
-    private eventEmitter: EventEmitter2,
+    eventEmitter: EventEmitter2,
   ) {
-    super(connectionPoolService);
+    super(connectionPoolService, eventEmitter);
   }
 
   networkMeta: NetworkMetadataPayload;
@@ -96,18 +96,6 @@ export class StellarApiService extends ApiService<
       logger.error(e, 'Failed to init api service');
       throw e;
     }
-  }
-
-  private metadataMismatchError(
-    metadata: string,
-    expected: string,
-    actual: string,
-  ): Error {
-    return Error(
-      `Value of ${metadata} does not match across all endpoints. Please check that your endpoints are for the same network.\n
-       Expected: ${expected}
-       Actual: ${actual}`,
-    );
   }
 
   get api(): StellarApi {

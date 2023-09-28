@@ -10,7 +10,10 @@ import {
   NestLogger,
 } from '@subql/node-core';
 import { StellarBlockWrapper } from '@subql/types-stellar';
-import { SubqlProjectDs, SubqueryProject } from '../configure/SubqueryProject';
+import {
+  StellarProjectDs,
+  SubqueryProject,
+} from '../configure/SubqueryProject';
 import { ProjectService } from '../indexer/project.service';
 import { StellarApi, StellarApiService } from '../stellar';
 import SafeStellarProvider from '../stellar/safe-api';
@@ -20,7 +23,7 @@ export class TestingService extends BaseTestingService<
   StellarApi,
   SafeStellarProvider,
   StellarBlockWrapper,
-  SubqlProjectDs
+  StellarProjectDs
 > {
   constructor(
     nodeConfig: NodeConfig,
@@ -34,7 +37,7 @@ export class TestingService extends BaseTestingService<
       StellarApi,
       SafeStellarProvider,
       StellarBlockWrapper,
-      SubqlProjectDs
+      StellarProjectDs
     >
   > {
     const testContext = await NestFactory.createApplicationContext(
