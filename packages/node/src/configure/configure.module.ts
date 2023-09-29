@@ -1,7 +1,6 @@
 // Copyright 2020-2023 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import assert from 'assert';
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { IConfig, NodeConfig, registerApp } from '@subql/node-core';
 import { yargsOptions } from '../yargs';

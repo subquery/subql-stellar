@@ -68,8 +68,8 @@ export class SubqueryProject implements ISubqueryProject {
     path: string,
     rawManifest: unknown,
     reader: Reader,
-    networkOverrides?: Partial<StellarProjectNetworkConfig>,
     root?: string,
+    networkOverrides?: Partial<StellarProjectNetworkConfig>,
   ): Promise<SubqueryProject> {
     // rawManifest and reader can be reused here.
     // It has been pre-fetched and used for rebase manifest runner options with args
