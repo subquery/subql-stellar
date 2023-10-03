@@ -13,6 +13,7 @@ import {
   WorkerDynamicDsService,
   ConnectionPoolStateManager,
   WorkerConnectionPoolStateManager,
+  ProjectUpgradeSevice,
 } from '@subql/node-core';
 import { SubqueryProject } from '../../configure/SubqueryProject';
 import { StellarApiService } from '../../stellar';
@@ -43,18 +44,25 @@ import { WorkerUnfinalizedBlocksService } from './worker.unfinalizedBlocks.servi
       provide: ApiService,
       useFactory: async (
         project: SubqueryProject,
+        projectUpgradeService: ProjectUpgradeSevice,
         connectionPoolService: ConnectionPoolService<StellarApiConnection>,
         eventEmitter: EventEmitter2,
       ) => {
         const apiService = new StellarApiService(
           project,
+          projectUpgradeService,
           connectionPoolService,
           eventEmitter,
         );
         await apiService.init();
         return apiService;
       },
-      inject: ['ISubqueryProject', ConnectionPoolService, EventEmitter2],
+      inject: [
+        'ISubqueryProject',
+        'IProjectUpgradeService',
+        ConnectionPoolService,
+        EventEmitter2,
+      ],
     },
     SandboxService,
     DsProcessorService,

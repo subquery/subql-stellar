@@ -165,18 +165,6 @@ async function loadProjectFromManifestBase(
     isCustomDs,
   );
 
-  if (
-    dsHasSorobanEventHandler([
-      ...dataSources,
-      ...(templates as StellarProjectDs[]),
-    ]) &&
-    !network.sorobanEndpoint
-  ) {
-    throw new Error(
-      `Soroban network endpoint must be provided for network. chainId="${network.chainId}"`,
-    );
-  }
-
   const runner = projectManifest.runner;
   assert(
     validateSemver(packageVersion, runner.node.version),

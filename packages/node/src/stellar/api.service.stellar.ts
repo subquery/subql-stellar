@@ -3,16 +3,24 @@
 
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { StellarProjectNetwork } from '@subql/common-stellar';
+import {
+  StellarProjectNetwork,
+  StellarProjectNetworkConfig,
+} from '@subql/common-stellar';
 import {
   ApiService,
   ConnectionPoolService,
   NetworkMetadataPayload,
   getLogger,
   IndexerEvent,
+  ProjectUpgradeSevice,
 } from '@subql/node-core';
 import { StellarBlockWrapper } from '@subql/types-stellar';
-import { SubqueryProject } from '../configure/SubqueryProject';
+import {
+  StellarProjectDs,
+  SubqueryProject,
+  dsHasSorobanEventHandler,
+} from '../configure/SubqueryProject';
 import { StellarApiConnection } from './api.connection';
 import { StellarApi } from './api.stellar';
 import SafeStellarProvider from './safe-api';
@@ -30,6 +38,8 @@ export class StellarApiService extends ApiService<
 > {
   constructor(
     @Inject('ISubqueryProject') private project: SubqueryProject,
+    @Inject('IProjectUpgradeService')
+    private projectUpgradeService: ProjectUpgradeSevice,
     connectionPoolService: ConnectionPoolService<StellarApiConnection>,
     eventEmitter: EventEmitter2,
   ) {
@@ -37,7 +47,7 @@ export class StellarApiService extends ApiService<
   }
 
   async init(): Promise<StellarApiService> {
-    let network: StellarProjectNetwork;
+    let network: StellarProjectNetworkConfig;
     try {
       network = this.project.network;
     } catch (e) {
@@ -45,8 +55,32 @@ export class StellarApiService extends ApiService<
       process.exit(1);
     }
 
-    const sorobanClient = network.soroban
-      ? new SorobanServer(network.soroban)
+    const sorobanEndpoint: string | undefined =
+      network.sorobanEndpoint ??
+      (
+        this.projectUpgradeService.getProject(Number.MAX_SAFE_INTEGER)
+          .network as StellarProjectNetwork
+      ).soroban;
+
+    if (!network.sorobanEndpoint && sorobanEndpoint) {
+      //update sorobanEndpoint from parent project
+      this.project.network.sorobanEndpoint = sorobanEndpoint;
+    }
+
+    if (
+      dsHasSorobanEventHandler([
+        ...this.project.dataSources,
+        ...(this.project.templates as StellarProjectDs[]),
+      ]) &&
+      !sorobanEndpoint
+    ) {
+      throw new Error(
+        `Soroban network endpoint must be provided for network. chainId="${this.project.network.chainId}"`,
+      );
+    }
+
+    const sorobanClient = sorobanEndpoint
+      ? new SorobanServer(sorobanEndpoint)
       : undefined;
 
     await this.createConnections(

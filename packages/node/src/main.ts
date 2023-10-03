@@ -17,7 +17,7 @@ initLogger(
   argv.logLevel as string | undefined,
 );
 
-if (argv._[0] === undefined) {
+if (!argv._[0]) {
   // Lazy import, to allow logger to be initialised before bootstrap()
   // As bootstrap runs services that requires logger
   const { bootstrap } = require('./init');

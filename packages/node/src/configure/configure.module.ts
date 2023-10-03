@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0
 
 import { DynamicModule, Global, Module } from '@nestjs/common';
-import { IConfig, NodeConfig, registerApp } from '@subql/node-core';
+import { NodeConfig, registerApp } from '@subql/node-core';
 import { yargsOptions } from '../yargs';
 import { SubqueryProject } from './SubqueryProject';
-
-export interface IStellarConfig extends IConfig {
-  sorobanNetworkEndpoint: string;
-}
 
 const pjson = require('../../package.json');
 
@@ -20,12 +16,18 @@ export class ConfigureModule {
     project: SubqueryProject;
   }> {
     const { argv } = yargsOptions;
-    return registerApp<SubqueryProject>(
+    const { nodeConfig, project } = await registerApp<SubqueryProject>(
       argv,
       SubqueryProject.create.bind(SubqueryProject),
       yargsOptions.showHelp.bind(yargsOptions),
       pjson,
     );
+
+    if (argv['soroban-network-endpoint']) {
+      project.network.sorobanEndpoint = argv['soroban-network-endpoint'];
+    }
+
+    return { nodeConfig, project };
   }
   static async register(): Promise<DynamicModule> {
     const { nodeConfig, project } = await ConfigureModule.getInstance();

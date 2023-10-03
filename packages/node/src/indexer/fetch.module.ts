@@ -15,6 +15,7 @@ import {
   ConnectionPoolStateManager,
   NodeConfig,
   IProjectUpgradeService,
+  ProjectUpgradeSevice,
 } from '@subql/node-core';
 import { SubqueryProject } from '../configure/SubqueryProject';
 import { StellarApiConnection } from '../stellar/api.connection';
@@ -40,18 +41,25 @@ import { UnfinalizedBlocksService } from './unfinalizedBlocks.service';
       provide: ApiService,
       useFactory: async (
         project: SubqueryProject,
+        projectUpgradeService: ProjectUpgradeSevice,
         connectionPoolService: ConnectionPoolService<StellarApiConnection>,
         eventEmitter: EventEmitter2,
       ) => {
         const apiService = new StellarApiService(
           project,
+          projectUpgradeService,
           connectionPoolService,
           eventEmitter,
         );
         await apiService.init();
         return apiService;
       },
-      inject: ['ISubqueryProject', ConnectionPoolService, EventEmitter2],
+      inject: [
+        'ISubqueryProject',
+        'IProjectUpgradeService',
+        ConnectionPoolService,
+        EventEmitter2,
+      ],
     },
     IndexerManager,
     ConnectionPoolService,

@@ -76,6 +76,7 @@ export class BlockHandler implements SubqlBlockHandler {
 }
 
 export class TransactionHandler implements SubqlTransactionHandler {
+  @forbidNonWhitelisted({account: ''})
   @IsObject()
   @IsOptional()
   @Type(() => TransactionFilter)
@@ -87,6 +88,7 @@ export class TransactionHandler implements SubqlTransactionHandler {
 }
 
 export class SorobanTransactionHandler implements SubqlSorobanTransactionHandler {
+  @forbidNonWhitelisted({account: ''})
   @IsObject()
   @IsOptional()
   @Type(() => TransactionFilter)
@@ -98,6 +100,7 @@ export class SorobanTransactionHandler implements SubqlSorobanTransactionHandler
 }
 
 export class OperationHandler implements SubqlOperationHandler {
+  @forbidNonWhitelisted({type: '', sourceAccount: ''})
   @IsObject()
   @IsOptional()
   @Type(() => OperationFilter)
@@ -109,6 +112,7 @@ export class OperationHandler implements SubqlOperationHandler {
 }
 
 export class EffectHandler implements SubqlEffectHandler {
+  @forbidNonWhitelisted({type: '', account: ''})
   @IsObject()
   @IsOptional()
   @Type(() => EffectFilter)

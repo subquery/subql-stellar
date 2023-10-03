@@ -20,7 +20,7 @@ import {
   SubqlMapping,
   SubqlRuntimeDatasource,
 } from '@subql/types-stellar';
-import {plainToClass, Transform, TransformFnParams, Type} from 'class-transformer';
+import {plainToInstance, Transform, TransformFnParams, Type} from 'class-transformer';
 import {
   Equals,
   IsArray,
@@ -118,7 +118,7 @@ export class DeploymentV1_0_0 extends BaseDeploymentV1_0_0 {
     if (params.value.genesisHash && !params.value.chainId) {
       params.value.chainId = params.value.genesisHash;
     }
-    return plainToClass(ProjectNetworkDeploymentV1_0_0, params.value);
+    return plainToInstance(ProjectNetworkDeploymentV1_0_0, params.value);
   })
   @ValidateNested()
   @Type(() => ProjectNetworkDeploymentV1_0_0)
