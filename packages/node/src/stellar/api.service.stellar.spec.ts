@@ -44,6 +44,10 @@ const prepareApiService = async (
       ConnectionPoolService,
       ConnectionPoolStateManager,
       {
+        provide: 'IProjectUpgradeService',
+        useFactory: () => ({}),
+      },
+      {
         provide: NodeConfig,
         useFactory: () => ({}),
       },
