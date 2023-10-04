@@ -293,6 +293,10 @@ export class FetchService extends BaseFetchService<
     return this.apiService.unsafeApi;
   }
 
+  protected getGenesisHash(): string {
+    return this.apiService.networkMeta.genesisHash;
+  }
+
   protected buildDictionaryQueryEntries(
     dataSources: (SubqlDatasource & { name?: string })[],
   ): DictionaryQueryEntry[] {
