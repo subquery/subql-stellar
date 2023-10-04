@@ -2988,7 +2988,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@subql/common-stellar@workspace:packages/common-stellar"
   dependencies:
-    "@subql/common": 3.1.2-0
+    "@subql/common": ^3.1.1
     "@subql/types-stellar": "workspace:*"
     "@types/js-yaml": ^4.0.4
     "@types/pino": ^6.3.12
@@ -3002,7 +3002,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subql/common@npm:3.1.1":
+"@subql/common@npm:3.1.1, @subql/common@npm:^3.1.1":
   version: 3.1.1
   resolution: "@subql/common@npm:3.1.1"
   dependencies:
@@ -3020,25 +3020,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subql/common@npm:3.1.2-0":
-  version: 3.1.2-0
-  resolution: "@subql/common@npm:3.1.2-0"
-  dependencies:
-    "@subql/types-core": 0.1.1
-    axios: ^0.27.2
-    class-transformer: ^0.5.1
-    class-validator: ^0.14.0
-    fs-extra: ^10.1.0
-    ipfs-http-client: 56
-    js-yaml: ^4.1.0
-    reflect-metadata: ^0.1.13
-    semver: ^7.5.2
-    update-notifier: 5.1.0
-  checksum: a52d252704ce2ef0000a00ad4ea5a0cc87b18b02f8ffcea00b3d42c5372a37c62f4d9a7a02d21246bd11215fb5d3da8557c398a97e647fd60af8c71a85e74ec2
-  languageName: node
-  linkType: hard
-
-"@subql/node-core@npm:5.0.3":
+"@subql/node-core@npm:^5.0.3":
   version: 5.0.3
   resolution: "@subql/node-core@npm:5.0.3"
   dependencies:
@@ -3081,9 +3063,9 @@ __metadata:
     "@nestjs/schedule": ^3.0.1
     "@nestjs/schematics": ^9.2.0
     "@nestjs/testing": ^9.4.0
-    "@subql/common": 3.1.2-0
+    "@subql/common": ^3.1.1
     "@subql/common-stellar": "workspace:*"
-    "@subql/node-core": 5.0.3
+    "@subql/node-core": ^5.0.3
     "@subql/testing": ^2.0.0
     "@subql/types": ^2.2.1-1
     "@subql/types-stellar": "workspace:*"
