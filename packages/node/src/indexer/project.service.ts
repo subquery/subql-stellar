@@ -75,7 +75,6 @@ export class ProjectService extends BaseProjectService<
     return new Date((block as unknown as ServerApi.LedgerRecord).closed_at); // TODO test and make sure its in MS not S
   }
 
-  @mainThreadOnly()
   protected onProjectChange(project: SubqueryProject): void | Promise<void> {
     // TODO update this when implementing skipBlock feature for Eth
     // this.apiService.updateBlockFetching();

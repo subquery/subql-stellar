@@ -35,8 +35,7 @@
     "typescript": "^4.9.5"
   },
   "resolutions": {
-    "node-fetch": "2.6.7",
-    "@subql/type": "2.2.1-1"
+    "node-fetch": "2.6.7"
   },
   "scripts": {
     "build": "yarn workspaces foreach -ptA run build",

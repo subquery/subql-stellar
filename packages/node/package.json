@@ -29,7 +29,6 @@
     "@subql/node-core": "4.2.4-27",
     "@subql/testing": "^2.0.0",
     "@subql/types": "^2.2.1-1",
-    "@subql/types-core": "0.0.0-2",
     "@subql/types-stellar": "workspace:*",
     "cacheable-lookup": "6",
     "cron-converter": "^1.0.2",

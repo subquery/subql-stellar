@@ -294,7 +294,7 @@ export class FetchService extends BaseFetchService<
   }
 
   protected buildDictionaryQueryEntries(
-    dataSources: SubqlDatasource[],
+    dataSources: (SubqlDatasource & { name?: string })[],
   ): DictionaryQueryEntry[] {
     const [normalDataSources, templateDataSources] = partition(
       dataSources,

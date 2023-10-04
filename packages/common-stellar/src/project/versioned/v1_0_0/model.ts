@@ -58,10 +58,7 @@ export class StellarRuntimeDataSourceImpl
   }
 }
 
-export class StellarCustomDataSourceImpl<
-    K extends string = string,
-    M extends BaseMapping<any, any> = BaseMapping<Record<string, unknown>, any>
-  >
+export class StellarCustomDataSourceImpl<K extends string = string, M extends BaseMapping<any> = BaseMapping<any>>
   extends CustomDataSourceBase<K, M>
   implements SubqlCustomDatasource<K, M>
 {
@@ -103,11 +100,6 @@ export class ProjectNetworkDeploymentV1_0_0 {
 }
 
 export class StellarProjectNetwork extends CommonProjectNetworkV1_0_0<FileType> {
-  @ValidateNested()
-  @Type(() => FileType)
-  @IsOptional()
-  chaintypes?: FileType;
-
   @IsString()
   @IsOptional()
   soroban?: string;
