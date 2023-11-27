@@ -7,7 +7,6 @@ import {
   NodeConfig,
   SmartBatchService,
   StoreCacheService,
-  StoreService,
   IProjectService,
   PoiService,
   BlockDispatcher,
@@ -42,7 +41,6 @@ export class BlockDispatcherService
     @Inject('IProjectUpgradeService')
     projectUpgradeService: IProjectUpgradeService,
     smartBatchService: SmartBatchService,
-    storeService: StoreService,
     storeCacheService: StoreCacheService,
     poiService: PoiService,
     poiSyncService: PoiSyncService,
@@ -57,7 +55,6 @@ export class BlockDispatcherService
       smartBatchService,
       storeService,
       storeCacheService,
-      poiService,
       poiSyncService,
       project,
       dynamicDsService,
