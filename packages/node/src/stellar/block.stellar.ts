@@ -130,7 +130,7 @@ export class StellarBlockWrapped implements StellarBlockWrapper {
         if (!event.topic[i]) {
           return false;
         }
-        if (topic !== event.topic[i].str()) {
+        if (topic !== this.decodeScVals(event.topic[i])) {
           return false;
         }
       }
