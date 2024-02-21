@@ -14,7 +14,7 @@ import {
   StellarTransaction,
   StellarTransactionFilter,
 } from '@subql/types-stellar';
-import { Address, scValToNative, xdr } from 'soroban-client';
+import { Address, scValToNative, xdr } from 'stellar-sdk';
 import { stringNormalizedEq } from '../utils/string';
 
 export class StellarBlockWrapped implements StellarBlockWrapper {
