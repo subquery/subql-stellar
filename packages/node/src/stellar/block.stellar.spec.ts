@@ -191,6 +191,7 @@ describe('StellarBlockWrapped', () => {
 
     const mockEventFilterValid: SorobanEventFilter = {
       topics: ['topic1', 'topic2'],
+      contractId: new Contract(testAddress).toString(),
     };
 
     const mockEventFilterInvalid: SorobanEventFilter = {
