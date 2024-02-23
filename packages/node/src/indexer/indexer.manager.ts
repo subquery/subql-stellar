@@ -39,7 +39,6 @@ import {
   SorobanEvent,
   SorobanEventFilter,
 } from '@subql/types-stellar';
-import { scValToNative } from 'stellar-sdk';
 import { StellarProjectDs } from '../configure/SubqueryProject';
 import { StellarApi } from '../stellar';
 import { StellarBlockWrapped } from '../stellar/block.stellar';
@@ -139,18 +138,8 @@ export class IndexerManager extends BaseIndexerManager<
         for (const effect of operation.effects) {
           await this.indexEffect(effect, dataSources, getVM);
         }
-
         for (const event of operation.events) {
-          try {
-            await this.indexEvent(event, dataSources, getVM);
-          } catch (e) {
-            for (const t of event.topic) {
-              if ((t as any)._arm === 'address') {
-                const address = scValToNative(t);
-                console.log(address);
-              }
-            }
-          }
+          await this.indexEvent(event, dataSources, getVM);
         }
       }
     }
