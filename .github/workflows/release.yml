@@ -34,8 +34,6 @@ jobs:
             echo "commit-message=\"$(git log -1 --pretty=%B | head -n 1)\"" >> "$GITHUB_OUTPUT"
           fi
 
-
-
   Build-Publish:
     name: Build-Publish
     needs: pre-ci
