@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Bump version with `@subql/common-stellar`,`@subql/node-core`
 
 ## [3.11.2] - 2024-05-03
 ### Fixed
