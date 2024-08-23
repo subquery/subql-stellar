@@ -32,7 +32,7 @@ export class SorobanServer extends SorobanRpc.Server {
 
     if (eventsToCache?.length) {
       if (response.events.length === DEFAULT_PAGE_SIZE) {
-        const lastSequence = last(response.events).ledger;
+        const lastSequence = last(response.events)?.ledger;
         eventsToCache = eventsToCache.filter(
           (event) => event.ledger !== lastSequence,
         );
@@ -74,6 +74,7 @@ export class SorobanServer extends SorobanRpc.Server {
       if (!this.eventsCache[ledger]) {
         this.eventsCache[ledger] = {
           events: [],
+          latestLedger: response.latestLedger,
         } as SorobanRpc.Api.GetEventsResponse;
       }
       const eventExists = this.eventsCache[ledger].events.some(
@@ -89,6 +90,10 @@ export class SorobanServer extends SorobanRpc.Server {
     request: SorobanRpc.Server.GetEventsRequest,
   ): Promise<SorobanRpc.Api.GetEventsResponse> {
     const sequence = request.startLedger;
+
+    if (sequence === undefined) {
+      throw new Error(`Get soraban event failed, block sequence is missing`);
+    }
 
     if (this.eventsCache[sequence]) {
       const cachedEvents = this.eventsCache[sequence];

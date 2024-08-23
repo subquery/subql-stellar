@@ -118,7 +118,7 @@ export class StellarBlockWrapped implements StellarBlockWrapper {
     filter: SorobanEventFilter,
     address?: string,
   ): boolean {
-    if (address && !stringNormalizedEq(address, event.contractId.toString())) {
+    if (address && !stringNormalizedEq(address, event.contractId?.toString())) {
       return false;
     }
 

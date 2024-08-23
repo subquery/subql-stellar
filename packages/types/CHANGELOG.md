@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Suport for network endpoint config
+### Changed
+- Enable ts strict
+- Bump `stellar-sdk` version
+
 ## [3.5.0] - 2024-07-03
 ### Changed
 - Bump version with `@subql/types-core`

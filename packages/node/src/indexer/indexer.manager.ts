@@ -106,8 +106,7 @@ export class IndexerManager extends BaseIndexerManager<
   private async getApi(
     block: StellarBlockWrapper,
   ): Promise<SafeStellarProvider> {
-    // return this.apiService.safeApi(block.block.sequence);
-    return null;
+    return this.apiService.safeApi(block.block.sequence);
   }
 
   protected async indexBlockData(

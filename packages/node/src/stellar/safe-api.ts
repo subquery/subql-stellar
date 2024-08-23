@@ -11,8 +11,8 @@ import {
   SorobanRpc,
   Transaction,
   xdr,
+  rpc,
 } from 'stellar-sdk';
-import { Durability } from 'stellar-sdk/lib/soroban';
 
 // import { Durability } from 'soroban-client/lib/server';
 import { SorobanServer } from './soroban.server';
@@ -43,7 +43,7 @@ export default class SafeStellarProvider extends SorobanServer {
   async getContractData(
     contract: string | Address | Contract,
     key: xdr.ScVal,
-    durability: Durability = Durability.Persistent,
+    durability: rpc.Durability = rpc.Durability.Persistent,
   ): Promise<SorobanRpc.Api.LedgerEntryResult> {
     throw new Error('Method getContractData is not implemented.');
   }

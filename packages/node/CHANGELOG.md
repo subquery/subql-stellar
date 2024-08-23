@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Suport for network endpoint config providing the ability to set headers and rpc batch sizes 
+### Changed
+- Enable ts strict mode
+- Use Subquery Project code from node core 
+- Breaking change: Update to latest `@subql/node-core`, require indexing environment timezone set to UTC
+### Fixed
+- fix admin api `dbSize` issue 
+- fixed various issues causing poi inconsistency 
+
 ## [3.12.1] - 2024-08-21
 ### Fixed
 - Bump version with `@subql/common-stellar`, fix `OperationFilter` issue (#80)

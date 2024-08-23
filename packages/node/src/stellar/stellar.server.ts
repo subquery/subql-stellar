@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 import { getLogger } from '@subql/node-core';
-import { AxiosClient, Server } from 'stellar-sdk/lib/horizon';
+import { Horizon } from 'stellar-sdk';
 import URI from 'urijs';
 
 const logger = getLogger('stellar-server');
@@ -10,12 +10,13 @@ const logger = getLogger('stellar-server');
 export interface StellarNetwork {
   network_passphrase: string;
   history_latest_ledger: string;
+  name: string;
 }
 
-export class StellarServer extends Server {
+export class StellarServer extends Horizon.Server {
   async getNetwork(): Promise<StellarNetwork> {
     const network: StellarNetwork = (
-      await AxiosClient.get(URI(this.serverURL as any).toString())
+      await Horizon.AxiosClient.get(URI(this.serverURL as any).toString())
     ).data;
     return network;
   }

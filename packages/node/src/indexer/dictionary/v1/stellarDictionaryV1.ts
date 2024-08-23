@@ -21,11 +21,13 @@ import { SorobanEventFilter, SubqlDatasource } from '@subql/types-stellar';
 import { groupBy, partition, sortBy, uniqBy } from 'lodash';
 import { SubqueryProject } from '../../../configure/SubqueryProject';
 import { yargsOptions } from '../../../yargs';
+import { DsProcessorService } from '../../ds-processor.service';
 
-const logger = getLogger('dictionary v1');
+type GetDsProcessor = DsProcessorService['getDsProcessor'];
+
+const logger = getLogger('DictionaryService');
 function transactionFilterToQueryEntry(
   filter: StellarTransactionFilter,
-  dsOptions: SubqlStellarProcessorOptions | SubqlStellarProcessorOptions[],
 ): DictionaryQueryEntry {
   const conditions: DictionaryQueryCondition[] = [];
 
@@ -44,7 +46,6 @@ function transactionFilterToQueryEntry(
 
 function operationFilterToQueryEntry(
   filter: StellarOperationFilter,
-  dsOptions: SubqlStellarProcessorOptions | SubqlStellarProcessorOptions[],
 ): DictionaryQueryEntry {
   const conditions: DictionaryQueryCondition[] = [];
 
@@ -70,7 +71,6 @@ function operationFilterToQueryEntry(
 
 function effectFilterToQueryEntry(
   filter: StellarEffectFilter,
-  dsOptions: SubqlStellarProcessorOptions | SubqlStellarProcessorOptions[],
 ): DictionaryQueryEntry {
   const conditions: DictionaryQueryCondition[] = [];
 
@@ -103,7 +103,11 @@ function eventFilterToQueryEntry(
   const conditions: DictionaryQueryCondition[] = [];
 
   if (Array.isArray(dsOptions)) {
-    const addresses = dsOptions.map((option) => option.address).filter(Boolean);
+    const addresses = dsOptions
+      .map((option) => option.address)
+      .filter(
+        (address): address is string => address !== undefined && address !== '',
+      );
 
     if (addresses.length > queryAddressLimit) {
       logger.warn(
@@ -196,13 +200,9 @@ export function buildDictionaryQueryEntries(
         case StellarHandlerKind.Transaction: {
           const filter = handler.filter as StellarTransactionFilter;
           if (ds.groupedOptions) {
-            queryEntries.push(
-              transactionFilterToQueryEntry(filter, ds.groupedOptions),
-            );
+            queryEntries.push(transactionFilterToQueryEntry(filter));
           } else if (filter.account) {
-            queryEntries.push(
-              transactionFilterToQueryEntry(filter, ds.options),
-            );
+            queryEntries.push(transactionFilterToQueryEntry(filter));
           } else {
             return [];
           }
@@ -211,11 +211,9 @@ export function buildDictionaryQueryEntries(
         case StellarHandlerKind.Operation: {
           const filter = handler.filter as StellarOperationFilter;
           if (ds.groupedOptions) {
-            queryEntries.push(
-              operationFilterToQueryEntry(filter, ds.groupedOptions),
-            );
+            queryEntries.push(operationFilterToQueryEntry(filter));
           } else if (filter.sourceAccount || filter.type) {
-            queryEntries.push(operationFilterToQueryEntry(filter, ds.options));
+            queryEntries.push(operationFilterToQueryEntry(filter));
           } else {
             return [];
           }
@@ -224,11 +222,9 @@ export function buildDictionaryQueryEntries(
         case StellarHandlerKind.Effects: {
           const filter = handler.filter as StellarEffectFilter;
           if (ds.groupedOptions) {
-            queryEntries.push(
-              effectFilterToQueryEntry(filter, ds.groupedOptions),
-            );
+            queryEntries.push(effectFilterToQueryEntry(filter));
           } else if (filter.account || filter.type) {
-            queryEntries.push(effectFilterToQueryEntry(filter, ds.options));
+            queryEntries.push(effectFilterToQueryEntry(filter));
           } else {
             return [];
           }
@@ -241,7 +237,7 @@ export function buildDictionaryQueryEntries(
               eventFilterToQueryEntry(filter, ds.groupedOptions),
             );
           } else if (ds.options?.address || filter.topics) {
-            queryEntries.push(eventFilterToQueryEntry(filter, ds.options));
+            queryEntries.push(eventFilterToQueryEntry(filter, ds.options!));
           } else {
             return [];
           }
@@ -265,10 +261,8 @@ export class StellarDictionaryV1 extends DictionaryV1<SubqlStellarDataSource> {
   constructor(
     project: SubqueryProject,
     nodeConfig: NodeConfig,
-    protected getDsProcessor: (
-      ds: SubqlStellarDataSource,
-    ) => DsProcessor<SubqlStellarDataSource>,
-    dictionaryUrl?: string,
+    private getDsProcessor: GetDsProcessor,
+    dictionaryUrl: string,
     chainId?: string,
   ) {
     super(dictionaryUrl, chainId ?? project.network.chainId, nodeConfig);
@@ -277,10 +271,8 @@ export class StellarDictionaryV1 extends DictionaryV1<SubqlStellarDataSource> {
   static async create(
     project: SubqueryProject,
     nodeConfig: NodeConfig,
-    getDsProcessor: (
-      ds: SubqlStellarDataSource,
-    ) => DsProcessor<SubqlStellarDataSource>,
-    dictionaryUrl?: string,
+    getDsProcessor: GetDsProcessor,
+    dictionaryUrl: string,
     chainId?: string,
   ): Promise<StellarDictionaryV1> {
     const dictionary = new StellarDictionaryV1(
