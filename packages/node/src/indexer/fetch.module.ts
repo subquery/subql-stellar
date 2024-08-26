@@ -144,6 +144,5 @@ import { UnfinalizedBlocksService } from './unfinalizedBlocks.service';
     UnfinalizedBlocksService,
     MonitorService,
   ],
-  exports: [StoreService, StoreCacheService, MonitorService],
 })
 export class FetchModule {}
