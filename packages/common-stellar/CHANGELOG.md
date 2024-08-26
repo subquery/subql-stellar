@@ -7,10 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Update `@subql/common` 
-- - Enable ts strict
+- Update `@subql/common` (#82)
+- - Enable ts strict (#82)
 ### Added
-- Suport for network endpoint config
+- Suport for network endpoint config (#82)
 
 ## [4.0.1] - 2024-08-21
 ### Fixed

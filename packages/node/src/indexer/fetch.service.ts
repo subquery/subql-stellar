@@ -92,9 +92,7 @@ export class FetchService extends BaseFetchService<
   }
 
   protected async initBlockDispatcher(): Promise<void> {
-    await this.blockDispatcher.init((height) =>
-      Promise.resolve(this.resetForNewDs(height)),
-    );
+    await this.blockDispatcher.init(this.resetForNewDs.bind(this));
   }
 
   protected async preLoopHook(): Promise<void> {

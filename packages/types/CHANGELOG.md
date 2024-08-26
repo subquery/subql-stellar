@@ -7,10 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Suport for network endpoint config
-### Changed
-- Enable ts strict
-- Bump `stellar-sdk` version
+- Suport for network endpoint config (#82)
+### Changed 
+- Enable ts strict (#82)
+- Bump `stellar-sdk` version (#82)
 
 ## [3.5.0] - 2024-07-03
 ### Changed

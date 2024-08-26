@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Suport for network endpoint config providing the ability to set headers and rpc batch sizes 
+- Suport for network endpoint config providing the ability to set headers and rpc batch sizes  (#82)
 ### Changed
-- Enable ts strict mode
-- Use Subquery Project code from node core 
-- Breaking change: Update to latest `@subql/node-core`, require indexing environment timezone set to UTC
+- Enable ts strict mode (#82)
+- Use Subquery Project code from node core (#82)
+- Breaking change: Update to latest `@subql/node-core`, require indexing environment timezone set to UTC (#82)
 ### Fixed
 - fix admin api `dbSize` issue 
 - fixed various issues causing poi inconsistency 

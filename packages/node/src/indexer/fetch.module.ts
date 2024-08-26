@@ -36,9 +36,6 @@ import { UnfinalizedBlocksService } from './unfinalizedBlocks.service';
 @Module({
   imports: [CoreModule],
   providers: [
-    InMemoryCacheService,
-    StoreService,
-    StoreCacheService,
     {
       provide: ApiService,
       useFactory: async (
@@ -133,16 +130,13 @@ import { UnfinalizedBlocksService } from './unfinalizedBlocks.service';
     },
     FetchService,
     StellarDictionaryService,
-    SandboxService,
     DsProcessorService,
     DynamicDsService,
-    PoiSyncService,
     {
       useClass: ProjectService,
       provide: 'IProjectService',
     },
     UnfinalizedBlocksService,
-    MonitorService,
   ],
 })
 export class FetchModule {}

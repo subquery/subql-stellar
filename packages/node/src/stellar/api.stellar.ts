@@ -393,7 +393,7 @@ export class StellarApi implements ApiWrapper {
 
   getSafeApi(blockHeight: number): SafeStellarProvider {
     //safe api not implemented yet
-    return new SafeStellarProvider(this.api.serverURL, blockHeight);
+    return new SafeStellarProvider(this.sorobanClient, blockHeight);
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
