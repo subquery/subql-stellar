@@ -106,7 +106,7 @@ function eventFilterToQueryEntry(
     const addresses = dsOptions
       .map((option) => option.address)
       .filter(
-        (address): address is string => address !== undefined && address !== '',
+        (address): address is string => !!address,
       );
 
     if (addresses.length > queryAddressLimit) {
