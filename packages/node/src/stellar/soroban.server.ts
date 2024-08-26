@@ -32,7 +32,7 @@ export class SorobanServer extends SorobanRpc.Server {
 
     if (eventsToCache?.length) {
       if (response.events.length === DEFAULT_PAGE_SIZE) {
-        const lastSequence = last(response.events)?.ledger;
+        const lastSequence = last(response.events)!.ledger;
         eventsToCache = eventsToCache.filter(
           (event) => event.ledger !== lastSequence,
         );
