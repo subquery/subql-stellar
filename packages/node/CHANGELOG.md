@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.0.0] - 2024-08-27
 ### Added
-- Suport for network endpoint config providing the ability to set headers and rpc batch sizes  (#82)
+- Support for network endpoint config providing the ability to set headers and rpc batch sizes  (#82)
 
 ### Changed
 - Enable ts strict mode (#82)

@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.6.0] - 2024-08-27
 ### Added
-- Suport for network endpoint config (#82)
+- Support for network endpoint config (#82)
 
 ### Changed
 - Enable ts strict (#82)
