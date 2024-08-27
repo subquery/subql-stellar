@@ -10,8 +10,6 @@ import {
   validateObject,
   CommonProjectNetworkV1_0_0,
   BaseDeploymentV1_0_0,
-  CommonEndpointConfig,
-  IsNetworkEndpoint,
 } from '@subql/common';
 import {BaseMapping, NodeSpec, ParentProject, QuerySpec, RunnerSpecs} from '@subql/types-core';
 import {

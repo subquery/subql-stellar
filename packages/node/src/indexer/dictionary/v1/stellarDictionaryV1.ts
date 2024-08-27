@@ -14,11 +14,10 @@ import {
   DictionaryQueryCondition,
   DictionaryQueryEntry,
   DictionaryQueryEntry as DictionaryV1QueryEntry,
-  DsProcessor,
 } from '@subql/types-core';
 
 import { SorobanEventFilter, SubqlDatasource } from '@subql/types-stellar';
-import { groupBy, partition, sortBy, uniqBy } from 'lodash';
+import { sortBy, uniqBy } from 'lodash';
 import { SubqueryProject } from '../../../configure/SubqueryProject';
 import { yargsOptions } from '../../../yargs';
 import { DsProcessorService } from '../../ds-processor.service';
@@ -93,7 +92,6 @@ function effectFilterToQueryEntry(
     conditions,
   };
 }
-
 function eventFilterToQueryEntry(
   filter: SorobanEventFilter,
   dsOptions: SubqlStellarProcessorOptions | SubqlStellarProcessorOptions[],
@@ -105,9 +103,7 @@ function eventFilterToQueryEntry(
   if (Array.isArray(dsOptions)) {
     const addresses = dsOptions
       .map((option) => option.address)
-      .filter(
-        (address): address is string => !!address,
-      );
+      .filter((address): address is string => !!address);
 
     if (addresses.length > queryAddressLimit) {
       logger.warn(
@@ -151,41 +147,16 @@ function eventFilterToQueryEntry(
   };
 }
 
+/*
+  We can bring groupedOptions back once dictionary event options are supported
+  And only event filter support options
+ */
 type GroupedSubqlProjectDs = SubqlDatasource & {
   groupedOptions?: SubqlStellarProcessorOptions[];
 };
 
-function buildDictionaryV1QueryEntries(
-  dataSources: (SubqlDatasource & { name?: string })[],
-): DictionaryV1QueryEntry[] {
-  const [normalDataSources, templateDataSources] = partition(
-    dataSources,
-    (ds) => !ds.name,
-  );
-
-  // Group templ
-  const groupedDataSources = Object.values(
-    groupBy(templateDataSources, (ds) => ds.name),
-  ).map((grouped) => {
-    if (grouped.length === 1) {
-      return grouped[0];
-    }
-    const options = grouped.map((ds) => ds.options);
-    const ref = grouped[0];
-
-    return {
-      ...ref,
-      groupedOptions: options,
-    };
-  });
-
-  const filteredDs = [...normalDataSources, ...groupedDataSources];
-
-  return buildDictionaryQueryEntries(filteredDs);
-}
-
 export function buildDictionaryQueryEntries(
-  dataSources: GroupedSubqlProjectDs[],
+  dataSources: SubqlDatasource[],
 ): DictionaryV1QueryEntry[] {
   const queryEntries: DictionaryQueryEntry[] = [];
 
@@ -199,9 +170,7 @@ export function buildDictionaryQueryEntries(
           return [];
         case StellarHandlerKind.Transaction: {
           const filter = handler.filter as StellarTransactionFilter;
-          if (ds.groupedOptions) {
-            queryEntries.push(transactionFilterToQueryEntry(filter));
-          } else if (filter.account) {
+          if (filter.account) {
             queryEntries.push(transactionFilterToQueryEntry(filter));
           } else {
             return [];
@@ -210,9 +179,7 @@ export function buildDictionaryQueryEntries(
         }
         case StellarHandlerKind.Operation: {
           const filter = handler.filter as StellarOperationFilter;
-          if (ds.groupedOptions) {
-            queryEntries.push(operationFilterToQueryEntry(filter));
-          } else if (filter.sourceAccount || filter.type) {
+          if (filter.sourceAccount || filter.type) {
             queryEntries.push(operationFilterToQueryEntry(filter));
           } else {
             return [];
@@ -221,22 +188,18 @@ export function buildDictionaryQueryEntries(
         }
         case StellarHandlerKind.Effects: {
           const filter = handler.filter as StellarEffectFilter;
-          if (ds.groupedOptions) {
-            queryEntries.push(effectFilterToQueryEntry(filter));
-          } else if (filter.account || filter.type) {
+          if (filter.account || filter.type) {
             queryEntries.push(effectFilterToQueryEntry(filter));
           } else {
             return [];
           }
           break;
         }
+        // TODO, event is not provided in current dictionary,
+        //  https://github.com/subquery/stellar-subql-dictionaries/blob/main/schema.graphql
         case StellarHandlerKind.Event: {
           const filter = handler.filter as SorobanEventFilter;
-          if (ds.groupedOptions) {
-            queryEntries.push(
-              eventFilterToQueryEntry(filter, ds.groupedOptions),
-            );
-          } else if (ds.options?.address || filter.topics) {
+          if (ds.options?.address || filter.topics) {
             queryEntries.push(eventFilterToQueryEntry(filter, ds.options!));
           } else {
             return [];
@@ -289,6 +252,6 @@ export class StellarDictionaryV1 extends DictionaryV1<SubqlStellarDataSource> {
   buildDictionaryQueryEntries(
     dataSources: SubqlStellarDataSource[],
   ): DictionaryV1QueryEntry[] {
-    return buildDictionaryV1QueryEntries(dataSources);
+    return buildDictionaryQueryEntries(dataSources);
   }
 }
