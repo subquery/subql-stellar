@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
 import { Memo, MemoType, Operation } from '@stellar/stellar-base';
-import { getLogger } from '@subql/node-core';
 import {
   Account,
   Address,
@@ -12,7 +11,8 @@ import {
   Transaction,
   xdr,
   rpc,
-} from 'stellar-sdk';
+} from '@stellar/stellar-sdk';
+import { getLogger } from '@subql/node-core';
 
 // import { Durability } from 'soroban-client/lib/server';
 import { SorobanServer } from './soroban.server';

@@ -4,11 +4,11 @@
 import { INestApplication } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test } from '@nestjs/testing';
+import { scValToNative } from '@stellar/stellar-sdk';
 import { ConnectionPoolService, delay, NodeConfig } from '@subql/node-core';
 import { ConnectionPoolStateManager } from '@subql/node-core/dist';
 import { GraphQLSchema } from 'graphql';
 import { range, some } from 'lodash';
-import { scValToNative } from 'stellar-sdk';
 import { SubqueryProject } from '../configure/SubqueryProject';
 import { StellarApiService } from './api.service.stellar';
 import { StellarApi } from './api.stellar';

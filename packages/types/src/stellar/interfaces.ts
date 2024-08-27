@@ -1,7 +1,7 @@
 // Copyright 2020-2024 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import {Contract, xdr, Horizon} from 'stellar-sdk';
+import {Contract, xdr, Horizon} from '@stellar/stellar-sdk';
 import {BlockWrapper} from '../interfaces';
 
 export type StellarBlock = Omit<Horizon.ServerApi.LedgerRecord, 'effects' | 'operations' | 'self' | 'transactions'> & {

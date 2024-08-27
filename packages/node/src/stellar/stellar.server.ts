@@ -1,8 +1,8 @@
 // Copyright 2020-2024 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
+import { Horizon } from '@stellar/stellar-sdk';
 import { getLogger } from '@subql/node-core';
-import { Horizon } from 'stellar-sdk';
 import URI from 'urijs';
 
 const logger = getLogger('stellar-server');

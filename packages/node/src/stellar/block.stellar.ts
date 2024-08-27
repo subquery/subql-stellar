@@ -1,6 +1,7 @@
 // Copyright 2020-2024 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
+import { scValToNative } from '@stellar/stellar-sdk';
 import { filterBlockTimestamp } from '@subql/node-core';
 import {
   StellarBlock,
@@ -15,7 +16,6 @@ import {
   StellarTransaction,
   StellarTransactionFilter,
 } from '@subql/types-stellar';
-import { scValToNative } from 'stellar-sdk';
 import { SubqlProjectBlockFilter } from '../configure/SubqueryProject';
 import { stringNormalizedEq } from '../utils/string';
 

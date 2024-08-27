@@ -2606,10 +2606,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@stellar/stellar-sdk@npm:^12.2.0":
+  version: 12.2.0
+  resolution: "@stellar/stellar-sdk@npm:12.2.0"
+  dependencies:
+    "@stellar/stellar-base": ^12.1.0
+    axios: ^1.7.2
+    bignumber.js: ^9.1.2
+    eventsource: ^2.0.2
+    randombytes: ^2.1.0
+    toml: ^3.0.0
+    urijs: ^1.19.1
+  checksum: 47fc8e0f26b71aa22af27bffa8b4ce6be6579005c875dae9e2f9a721def4028c520a9675d005f03db079922e115ce12c9d61c5fae4b491b9aeb55bf6c53dcc35
+  languageName: node
+  linkType: hard
+
 "@subql/common-stellar@workspace:*, @subql/common-stellar@workspace:packages/common-stellar":
   version: 0.0.0-use.local
   resolution: "@subql/common-stellar@workspace:packages/common-stellar"
   dependencies:
+    "@stellar/stellar-sdk": ^12.2.0
     "@subql/common": ^5.1.1
     "@subql/types-stellar": "workspace:*"
     "@types/js-yaml": ^4.0.4
@@ -2617,7 +2633,6 @@ __metadata:
     js-yaml: ^4.1.0
     pino: ^6.13.3
     reflect-metadata: ^0.1.13
-    stellar-sdk: ^12.2.0
   peerDependencies:
     class-transformer: "*"
     class-validator: "*"
@@ -2683,6 +2698,7 @@ __metadata:
     "@nestjs/schedule": ^3.0.1
     "@nestjs/schematics": ^9.2.0
     "@nestjs/testing": ^9.4.0
+    "@stellar/stellar-sdk": ^12.2.0
     "@subql/common-stellar": "workspace:*"
     "@subql/node-core": ^14.1.2
     "@subql/testing": ^2.2.0
@@ -2699,7 +2715,6 @@ __metadata:
     pg: ^8.11.5
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
-    stellar-sdk: ^12.2.0
     yargs: ^16.2.0
   peerDependencies:
     "@subql/utils": "*"
@@ -2737,8 +2752,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@subql/types-stellar@workspace:packages/types"
   dependencies:
+    "@stellar/stellar-sdk": ^12.2.0
     "@subql/types-core": ^1.1.1
-    stellar-sdk: ^12.2.0
   languageName: unknown
   linkType: soft
 
@@ -10326,21 +10341,6 @@ __metadata:
   version: 2.0.1
   resolution: "statuses@npm:2.0.1"
   checksum: 18c7623fdb8f646fb213ca4051be4df7efb3484d4ab662937ca6fbef7ced9b9e12842709872eb3020cc3504b93bde88935c9f6417489627a7786f24f8031cbcb
-  languageName: node
-  linkType: hard
-
-"stellar-sdk@npm:^12.2.0":
-  version: 12.2.0
-  resolution: "stellar-sdk@npm:12.2.0"
-  dependencies:
-    "@stellar/stellar-base": ^12.1.0
-    axios: ^1.7.2
-    bignumber.js: ^9.1.2
-    eventsource: ^2.0.2
-    randombytes: ^2.1.0
-    toml: ^3.0.0
-    urijs: ^1.19.1
-  checksum: 104ed1b9dd104e6d075ea4e9d006983d0b60acbd25cdcb48d49b6062d14e7262a479466d67d0f78fe9e626fae0e0bec2ae43867f65fb607877f31a26de852950
   languageName: node
   linkType: hard
 

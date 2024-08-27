@@ -1,6 +1,7 @@
 // Copyright 2020-2024 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
+import { nativeToScVal, Contract, xdr, Horizon } from '@stellar/stellar-sdk';
 import {
   StellarBlock,
   StellarBlockFilter,
@@ -13,7 +14,6 @@ import {
   StellarTransaction,
   StellarTransactionFilter,
 } from '@subql/types-stellar';
-import { nativeToScVal, Contract, xdr, Horizon } from 'stellar-sdk';
 import { StellarBlockWrapped } from './block.stellar';
 
 const testAddress = 'CA3D5KRYM6CB7OWQ6TWYRR3Z4T7GNZLKERYNZGGA5SOAOPIFY6YQGAXE';

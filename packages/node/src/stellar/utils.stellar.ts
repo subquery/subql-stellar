@@ -1,13 +1,13 @@
 // Copyright 2020-2024 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
+import { Horizon } from '@stellar/stellar-sdk';
 import { Header, IBlock } from '@subql/node-core';
 import {
   ApiWrapper,
   StellarBlock,
   StellarBlockWrapper,
 } from '@subql/types-stellar';
-import { Horizon } from 'stellar-sdk';
 
 export function stellarBlockToHeader(
   block: StellarBlock | Horizon.ServerApi.LedgerRecord,

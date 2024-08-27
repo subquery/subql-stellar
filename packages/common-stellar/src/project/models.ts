@@ -1,6 +1,7 @@
 // Copyright 2020-2024 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
+import {Horizon} from '@stellar/stellar-sdk';
 import {BaseDataSource, forbidNonWhitelisted, ProcessorImpl} from '@subql/common';
 import {Processor, FileReference} from '@subql/types-core';
 import {
@@ -26,7 +27,6 @@ import {
 } from '@subql/types-stellar';
 import {plainToClass, Transform, Type} from 'class-transformer';
 import {IsArray, IsEnum, IsInt, IsOptional, IsString, IsObject, ValidateNested} from 'class-validator';
-import {Horizon} from 'stellar-sdk';
 import {SubqlStellarProcessorOptions} from './types';
 
 export class BlockFilter implements StellarBlockFilter {

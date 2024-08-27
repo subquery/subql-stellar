@@ -3,6 +3,7 @@
 
 import assert from 'assert';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Horizon } from '@stellar/stellar-sdk';
 import { getLogger, IBlock } from '@subql/node-core';
 import {
   ApiWrapper,
@@ -15,7 +16,6 @@ import {
   IStellarEndpointConfig,
 } from '@subql/types-stellar';
 import { cloneDeep } from 'lodash';
-import { Horizon } from 'stellar-sdk';
 import { StellarBlockWrapped } from '../stellar/block.stellar';
 import SafeStellarProvider from './safe-api';
 import { SorobanServer } from './soroban.server';
