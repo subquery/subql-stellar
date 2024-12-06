@@ -64,7 +64,6 @@ import { StellarApiConnection } from '../stellar/api.connection';
       },
       inject: [
         'ISubqueryProject',
-        'IProjectUpgradeService',
         ConnectionPoolService,
         EventEmitter2,
         NodeConfig,
