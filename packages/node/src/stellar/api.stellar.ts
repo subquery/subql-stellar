@@ -28,6 +28,7 @@ export class StellarApi implements ApiWrapper {
   private stellarClient: StellarServer;
 
   private chainId?: string;
+  private defaultLimit = 100;
 
   constructor(
     private endpoint: string,
@@ -35,6 +36,7 @@ export class StellarApi implements ApiWrapper {
     config?: IStellarEndpointConfig,
   ) {
     const { hostname, protocol, searchParams } = new URL(this.endpoint);
+    this.defaultLimit = config?.limit || this.defaultLimit;
 
     const protocolStr = protocol.replace(':', '');
 
@@ -100,7 +102,11 @@ export class StellarApi implements ApiWrapper {
     sequence: number,
   ): Promise<Horizon.ServerApi.TransactionRecord[]> {
     const txs: Horizon.ServerApi.TransactionRecord[] = [];
-    let txsPage = await this.api.transactions().forLedger(sequence).call();
+    let txsPage = await this.api
+      .transactions()
+      .forLedger(sequence)
+      .limit(this.defaultLimit)
+      .call();
     while (txsPage.records.length !== 0) {
       txs.push(...txsPage.records);
       txsPage = await txsPage.next();
@@ -113,7 +119,11 @@ export class StellarApi implements ApiWrapper {
     sequence: number,
   ): Promise<Horizon.ServerApi.OperationRecord[]> {
     const operations: Horizon.ServerApi.OperationRecord[] = [];
-    let operationsPage = await this.api.operations().forLedger(sequence).call();
+    let operationsPage = await this.api
+      .operations()
+      .forLedger(sequence)
+      .limit(this.defaultLimit)
+      .call();
     while (operationsPage.records.length !== 0) {
       operations.push(...operationsPage.records);
       operationsPage = await operationsPage.next();
@@ -126,7 +136,11 @@ export class StellarApi implements ApiWrapper {
     sequence: number,
   ): Promise<Horizon.ServerApi.EffectRecord[]> {
     const effects: Horizon.ServerApi.EffectRecord[] = [];
-    let effectsPage = await this.api.effects().forLedger(sequence).call();
+    let effectsPage = await this.api
+      .effects()
+      .forLedger(sequence)
+      .limit(this.defaultLimit)
+      .call();
     while (effectsPage.records.length !== 0) {
       effects.push(...effectsPage.records);
       effectsPage = await effectsPage.next();
