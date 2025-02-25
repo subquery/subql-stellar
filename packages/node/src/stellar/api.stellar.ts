@@ -28,7 +28,7 @@ export class StellarApi implements ApiWrapper {
   private stellarClient: StellarServer;
 
   private chainId?: string;
-  private defaultLimit = 100;
+  private pageLimit = 150;
 
   constructor(
     private endpoint: string,
@@ -36,11 +36,13 @@ export class StellarApi implements ApiWrapper {
     config?: IStellarEndpointConfig,
   ) {
     const { hostname, protocol, searchParams } = new URL(this.endpoint);
-    this.defaultLimit = config?.limit || this.defaultLimit;
+    this.pageLimit = config?.pageLimit || this.pageLimit;
 
     const protocolStr = protocol.replace(':', '');
 
-    logger.info(`Api host: ${hostname}, method: ${protocolStr}`);
+    logger.info(
+      `Api host: ${hostname}, method: ${protocolStr}, pageLimit: ${this.pageLimit}`,
+    );
     if (protocolStr === 'https' || protocolStr === 'http') {
       const options: Horizon.Server.Options = {
         allowHttp: protocolStr === 'http',
@@ -105,7 +107,7 @@ export class StellarApi implements ApiWrapper {
     let txsPage = await this.api
       .transactions()
       .forLedger(sequence)
-      .limit(this.defaultLimit)
+      .limit(this.pageLimit)
       .call();
     while (txsPage.records.length !== 0) {
       txs.push(...txsPage.records);
@@ -122,7 +124,7 @@ export class StellarApi implements ApiWrapper {
     let operationsPage = await this.api
       .operations()
       .forLedger(sequence)
-      .limit(this.defaultLimit)
+      .limit(this.pageLimit)
       .call();
     while (operationsPage.records.length !== 0) {
       operations.push(...operationsPage.records);
@@ -139,7 +141,7 @@ export class StellarApi implements ApiWrapper {
     let effectsPage = await this.api
       .effects()
       .forLedger(sequence)
-      .limit(this.defaultLimit)
+      .limit(this.pageLimit)
       .call();
     while (effectsPage.records.length !== 0) {
       effects.push(...effectsPage.records);
@@ -166,6 +168,7 @@ export class StellarApi implements ApiWrapper {
     const { events: events } = await this.sorobanClient.getEvents({
       startLedger: height,
       filters: [],
+      limit: this.pageLimit,
     });
     return events.map((event) => {
       const wrappedEvent = {

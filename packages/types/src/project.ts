@@ -321,9 +321,9 @@ export interface IStellarEndpointConfig extends IEndpointConfig {
   batchSize?: number;
 
   /**
-   * The default limit for the number of records to fetch
+   * The page limit for the number of records to fetch per request. Default value is 150
    */
-  limit?: number;
+  pageLimit?: number;
 }
 
 /**
