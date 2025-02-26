@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.2.0] - 2025-02-26
 ### Fixed
 - IStellarEndpointConfig add optional parameter `pageLimit`
 
@@ -67,7 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use @subql/types-core (#18)
 
 ## [2.3.0] - 2023-09-12
-[Unreleased]: https://github.com/subquery/subql-stellar/compare/types-stellar/4.1.0...HEAD
+[Unreleased]: https://github.com/subquery/subql-stellar/compare/types-stellar/4.2.0...HEAD
+[4.2.0]: https://github.com/subquery/subql-stellar/compare/types-stellar/4.1.0...types-stellar/4.2.0
 [4.1.0]: https://github.com/subquery/subql-stellar/compare/types-stellar/4.0.2...types-stellar/4.1.0
 [4.0.2]: https://github.com/subquery/subql-stellar/compare/types-stellar/3.6.0...types-stellar/4.0.2
 [3.6.0]: https://github.com/subquery/subql-stellar/compare/types-stellar/3.5.0...types-stellar/3.6.0
