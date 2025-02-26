@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [4.2.0] - 2025-02-26
-### Fixed
+### Added
 - IStellarEndpointConfig add optional parameter `pageLimit`
 
 ## [4.1.0] - 2025-02-05
