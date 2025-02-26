@@ -19,7 +19,7 @@ import { StellarBlockWrapped } from '../stellar/block.stellar';
 import SafeStellarProvider from './safe-api';
 import { SorobanServer } from './soroban.server';
 import { StellarServer } from './stellar.server';
-import { formatBlockUtil } from './utils.stellar';
+import { DEFAULT_PAGE_SIZE, formatBlockUtil } from './utils.stellar';
 
 const logger = getLogger('api.Stellar');
 
@@ -28,7 +28,7 @@ export class StellarApi implements ApiWrapper {
   private stellarClient: StellarServer;
 
   private chainId?: string;
-  private pageLimit = 150;
+  private pageLimit = DEFAULT_PAGE_SIZE;
 
   constructor(
     private endpoint: string,

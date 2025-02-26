@@ -4,8 +4,7 @@
 import { rpc } from '@stellar/stellar-sdk';
 import { SorobanRpcEventResponse } from '@subql/types-stellar';
 import { compact, groupBy, last } from 'lodash';
-
-const DEFAULT_PAGE_SIZE = 100;
+import { DEFAULT_PAGE_SIZE } from './utils.stellar';
 
 type CachedEventsResponse = Pick<
   rpc.Api.GetEventsResponse,
