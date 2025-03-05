@@ -2132,20 +2132,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/schedule@npm:^3.0.1":
-  version: 3.0.3
-  resolution: "@nestjs/schedule@npm:3.0.3"
-  dependencies:
-    cron: 2.4.1
-    uuid: 9.0.0
-  peerDependencies:
-    "@nestjs/common": ^8.0.0 || ^9.0.0 || ^10.0.0
-    "@nestjs/core": ^8.0.0 || ^9.0.0 || ^10.0.0
-    reflect-metadata: ^0.1.12
-  checksum: 21d4a853d893a514dbbc76b278e10908f6376fef1d37beb8213ed6a15bc3f66d0f0f3150cd98634ded39c1d7103223c346915f776349b40d1adc57bab6d6bbbf
-  languageName: node
-  linkType: hard
-
 "@nestjs/schedule@npm:^5.0.1":
   version: 5.0.1
   resolution: "@nestjs/schedule@npm:5.0.1"
@@ -2745,7 +2731,7 @@ __metadata:
     "@nestjs/core": ^11.0.11
     "@nestjs/event-emitter": ^3.0.1
     "@nestjs/platform-express": ^11.0.11
-    "@nestjs/schedule": ^3.0.1
+    "@nestjs/schedule": ^5.0.1
     "@nestjs/schematics": ^11.0.2
     "@nestjs/testing": ^11.0.11
     "@stellar/stellar-sdk": ^13.1.0
@@ -2763,10 +2749,7 @@ __metadata:
     dotenv: ^15.0.1
     lodash: ^4.17.21
     nodemon: ^2.0.15
-    pg: ^8.11.5
     reflect-metadata: ^0.1.13
-    rimraf: ^3.0.2
-    yargs: ^16.2.0
   peerDependencies:
     "@subql/utils": "*"
   bin:
@@ -4861,15 +4844,6 @@ __metadata:
   dependencies:
     luxon: ^3.1.0
   checksum: 74ef69ec7e9020183cfa8f117fe687c654ba32f863ae8cf86a834b5baafd1321ee0d9caa62cc8e6e4cfe02b255f237ed0a0f91f0da78d01eb49317d06bf76f3d
-  languageName: node
-  linkType: hard
-
-"cron@npm:2.4.1":
-  version: 2.4.1
-  resolution: "cron@npm:2.4.1"
-  dependencies:
-    luxon: ^3.2.1
-  checksum: a421a837f99cf18da2f51e3608610f71817c38e6f756b4c85a26f64521dac327ac79861ae3dcf991076f72f3be0daadfffd413b4be0c3b4b029509b89e86b6d4
   languageName: node
   linkType: hard
 
@@ -8297,13 +8271,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.2.1":
-  version: 3.4.3
-  resolution: "luxon@npm:3.4.3"
-  checksum: 3eade81506224d038ed24035a0cd0dd4887848d7eba9361dce9ad8ef81380596a68153240be3988721f9690c624fb449fcf8fd8c3fc0681a6a8496faf48e92a3
-  languageName: node
-  linkType: hard
-
 "luxon@npm:~3.5.0":
   version: 3.5.0
   resolution: "luxon@npm:3.5.0"
@@ -9432,28 +9399,6 @@ __metadata:
     postgres-date: ~1.0.4
     postgres-interval: ^1.1.0
   checksum: bf4ec3f594743442857fb3a8dfe5d2478a04c98f96a0a47365014557cbc0b4b0cee01462c79adca863b93befbf88f876299b75b72c665b5fb84a2c94fbd10316
-  languageName: node
-  linkType: hard
-
-"pg@npm:^8.11.5":
-  version: 8.11.5
-  resolution: "pg@npm:8.11.5"
-  dependencies:
-    pg-cloudflare: ^1.1.1
-    pg-connection-string: ^2.6.4
-    pg-pool: ^3.6.2
-    pg-protocol: ^1.6.1
-    pg-types: ^2.1.0
-    pgpass: 1.x
-  peerDependencies:
-    pg-native: ">=3.0.1"
-  dependenciesMeta:
-    pg-cloudflare:
-      optional: true
-  peerDependenciesMeta:
-    pg-native:
-      optional: true
-  checksum: 2317bcc7080f116ced761620b8cbc98175080cacf1e8a894e14f468bcd9c996a7bd5ef36c9db91d380a772667508eb72c42b10206a90cd82b0b4a7669a19f9e4
   languageName: node
   linkType: hard
 
@@ -11752,15 +11697,6 @@ __metadata:
   version: 1.0.1
   resolution: "utils-merge@npm:1.0.1"
   checksum: c81095493225ecfc28add49c106ca4f09cdf56bc66731aa8dabc2edbbccb1e1bfe2de6a115e5c6a380d3ea166d1636410b62ef216bb07b3feb1cfde1d95d5080
-  languageName: node
-  linkType: hard
-
-"uuid@npm:9.0.0":
-  version: 9.0.0
-  resolution: "uuid@npm:9.0.0"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
   languageName: node
   linkType: hard
 
