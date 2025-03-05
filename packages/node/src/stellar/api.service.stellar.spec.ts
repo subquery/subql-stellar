@@ -55,7 +55,16 @@ const prepareApiService = async (
         provide: 'ISubqueryProject',
         useFactory: () => project ?? testSubqueryProject(endpoint, soroban),
       },
-      StellarApiService,
+      {
+        provide: StellarApiService,
+        useFactory: StellarApiService.create.bind(StellarApiService),
+        inject: [
+          'ISubqueryProject',
+          ConnectionPoolService,
+          EventEmitterModule,
+          NodeConfig,
+        ],
+      },
     ],
     imports: [EventEmitterModule.forRoot()],
   }).compile();
@@ -63,7 +72,6 @@ const prepareApiService = async (
   const app = module.createNestApplication();
   await app.init();
   const apiService = app.get(StellarApiService);
-  await apiService.init();
   return [apiService, app];
 };
 
