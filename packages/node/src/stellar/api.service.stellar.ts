@@ -17,6 +17,7 @@ import {
   StellarBlockWrapper,
   SubqlDatasource,
   IStellarEndpointConfig,
+  StellarHandlerKind,
 } from '@subql/types-stellar';
 import {
   SubqueryProject,
@@ -51,6 +52,10 @@ export class StellarApiService extends ApiService<
     nodeConfig: NodeConfig,
   ): Promise<StellarApiService> {
     let network: StellarProjectNetworkConfig;
+
+    const needSorobanTxMeta = !!project.dataSources.find(
+      (handler) => handler.kind === StellarHandlerKind.SorobanTransaction,
+    );
 
     const apiService = new StellarApiService(
       connectionPoolService,
@@ -102,7 +107,7 @@ export class StellarApiService extends ApiService<
         endpoint,
         apiService.fetchBlockBatches.bind(apiService),
         sorobanClient,
-        config,
+        { sorobanTxMeta: needSorobanTxMeta, ...config },
       ),
     );
 

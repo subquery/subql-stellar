@@ -324,6 +324,11 @@ export interface IStellarEndpointConfig extends IEndpointConfig {
    * The page limit for the number of records to fetch per request. Default value is 150
    */
   pageLimit?: number;
+
+  /**
+   * Need soroban meta data
+   */
+  sorobanTxMeta?: boolean;
 }
 
 /**

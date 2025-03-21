@@ -1,7 +1,8 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import {Horizon, rpc} from '@stellar/stellar-sdk';
+import {Horizon, rpc, xdr} from '@stellar/stellar-sdk';
+import {Api} from '@stellar/stellar-sdk/lib/rpc';
 import {BlockWrapper} from '../interfaces';
 
 export type StellarBlock = Omit<Horizon.ServerApi.LedgerRecord, 'effects' | 'operations' | 'self' | 'transactions'> & {
@@ -19,6 +20,7 @@ export type StellarTransaction = Omit<
   ledger: StellarBlock | null;
   operations: StellarOperation[];
   events: SorobanEvent[];
+  sorobanTxs?: Api.TransactionInfo;
 };
 
 export type StellarOperation<T extends Horizon.HorizonApi.BaseOperationResponse = Horizon.ServerApi.OperationRecord> =

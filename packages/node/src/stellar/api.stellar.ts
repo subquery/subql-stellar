@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0
 
 import assert from 'assert';
-import { Horizon } from '@stellar/stellar-sdk';
+import { Horizon, xdr } from '@stellar/stellar-sdk';
+import { Api } from '@stellar/stellar-sdk/lib/rpc';
 import { getLogger, IBlock } from '@subql/node-core';
 import {
   ApiWrapper,
@@ -29,6 +30,7 @@ export class StellarApi implements ApiWrapper {
 
   private chainId?: string;
   private pageLimit = DEFAULT_PAGE_SIZE;
+  private sorobanTxMeta: boolean;
 
   constructor(
     private endpoint: string,
@@ -37,6 +39,7 @@ export class StellarApi implements ApiWrapper {
   ) {
     const { hostname, protocol, searchParams } = new URL(this.endpoint);
     this.pageLimit = config?.pageLimit || this.pageLimit;
+    this.sorobanTxMeta = !!config?.sorobanTxMeta;
 
     const protocolStr = protocol.replace(':', '');
 
@@ -115,6 +118,60 @@ export class StellarApi implements ApiWrapper {
     }
 
     return txs;
+  }
+
+  private async getSorobanTxsForLedger(
+    sequence: number,
+  ): Promise<Api.TransactionInfo[]> {
+    if (!this.sorobanTxMeta) {
+      return [];
+    }
+
+    const transactionMetas: Api.TransactionInfo[] = [];
+    let existOtherLedger = false;
+    let cursor: undefined | string;
+    try {
+      do {
+        // There is an issue with the type definition of the input parameters; pagination is missing, so as any is used.
+        const requestBody = cursor
+          ? {
+              pagination: {
+                cursor,
+                limit: this.pageLimit,
+              },
+            }
+          : {
+              startLedger: sequence,
+              pagination: {
+                limit: this.pageLimit,
+              },
+            };
+        const txMetaPage = await this.sorobanClient.getTransactions(
+          requestBody as any,
+        );
+
+        for (const txMeta of txMetaPage.transactions) {
+          if (txMeta.ledger !== sequence) {
+            existOtherLedger = true;
+            break;
+          }
+          transactionMetas.push(txMeta);
+        }
+        cursor = txMetaPage.cursor;
+      } while (!existOtherLedger);
+    } catch (e: any) {
+      if (e.message.includes("(reading 'map')")) {
+        // This is a workaround for the issue where the soroban client returns an empty array for transactions
+        // when there are no transactions for the specified ledger.
+        logger.warn(
+          `No transactions found for ledger ${sequence}. Soroban client may not be fully synced.`,
+        );
+        return [];
+      }
+      throw e;
+    }
+
+    return transactionMetas;
   }
 
   private async fetchOperationsForLedger(
@@ -245,7 +302,11 @@ export class StellarApi implements ApiWrapper {
     operationsForSequence: Horizon.ServerApi.OperationRecord[],
     effectsForSequence: Horizon.ServerApi.EffectRecord[],
     eventsForSequence: SorobanEvent[],
+    sorobanTxs: Api.TransactionInfo[],
   ): StellarTransaction[] {
+    const sorabanTxMap = new Map(
+      sorobanTxs.map((sorobanTx) => [sorobanTx.txHash, sorobanTx]),
+    );
     return transactions.map((tx) => {
       const wrappedTx: StellarTransaction = {
         ...tx,
@@ -253,6 +314,7 @@ export class StellarApi implements ApiWrapper {
         operations: [] as StellarOperation[],
         effects: [] as StellarEffect[],
         events: [] as SorobanEvent[],
+        sorobanTxs: sorabanTxMap.get(tx.id),
       };
 
       const clonedTx = cloneDeep(wrappedTx);
@@ -289,12 +351,14 @@ export class StellarApi implements ApiWrapper {
   private async fetchAndWrapLedger(
     sequence: number,
   ): Promise<IBlock<StellarBlockWrapper>> {
-    const [ledger, transactions, operations, effects] = await Promise.all([
-      this.api.ledgers().ledger(sequence).call(),
-      this.fetchTransactionsForLedger(sequence),
-      this.fetchOperationsForLedger(sequence),
-      this.fetchEffectsForLedger(sequence),
-    ]);
+    const [ledger, transactions, operations, effects, sorobanTxs] =
+      await Promise.all([
+        this.api.ledgers().ledger(sequence).call(),
+        this.fetchTransactionsForLedger(sequence),
+        this.fetchOperationsForLedger(sequence),
+        this.fetchEffectsForLedger(sequence),
+        this.getSorobanTxsForLedger(sequence),
+      ]);
 
     let eventsForSequence: SorobanEvent[] = [];
 
@@ -342,6 +406,7 @@ export class StellarApi implements ApiWrapper {
       operations,
       effects,
       eventsForSequence,
+      sorobanTxs,
     );
 
     const clonedLedger = cloneDeep(wrappedLedger);
