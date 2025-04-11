@@ -11,7 +11,9 @@ jest.setTimeout(60000);
 
 const prepareStellarApi = async function () {
   const soroban = new SorobanServer(SOROBAN_ENDPOINT);
-  const api = new StellarApi(HTTP_ENDPOINT, soroban);
+  const api = new StellarApi(HTTP_ENDPOINT, soroban, {
+    sorobanTxMeta: true,
+  });
   await api.init();
   return api;
 };
@@ -95,5 +97,20 @@ describe('StellarApi', () => {
     await expect((stellarApi as any).fetchAndWrapLedger(100)).rejects.toThrow(
       /(Gone|Not Found)/,
     );
+  });
+
+  it('Able to correctly return sorabanTxs', async () => {
+    const latestHeight = await stellarApi.getFinalizedBlockHeight();
+    const { transactions: sorobanTxs } =
+      await stellarApi.sorobanClient.getTransactions({
+        startLedger: latestHeight - 100000,
+      });
+
+    // Get ledgers with transactions
+    const startLedger = sorobanTxs[0].ledger;
+    const block = (await stellarApi.fetchBlocks([startLedger]))[0];
+
+    expect(block.block.transactions[0].sorobanTxs).toBeDefined();
+    expect(block.block.transactions[0].sorobanTxs!.ledger).toEqual(startLedger);
   });
 });
