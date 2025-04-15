@@ -2055,7 +2055,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/common@npm:^11.0.11, @nestjs/common@npm:^11.0.7":
+"@nestjs/common@npm:^11.0.16":
+  version: 11.0.17
+  resolution: "@nestjs/common@npm:11.0.17"
+  dependencies:
+    iterare: 1.2.1
+    tslib: 2.8.1
+    uid: 2.0.2
+  peerDependencies:
+    class-transformer: "*"
+    class-validator: "*"
+    file-type: ^20.4.1
+    reflect-metadata: ^0.1.12 || ^0.2.0
+    rxjs: ^7.1.0
+  peerDependenciesMeta:
+    class-transformer:
+      optional: true
+    class-validator:
+      optional: true
+    file-type:
+      optional: true
+  checksum: 284571343ef3fe47823b34acb28e02d5ffd4c11d77ca6c56228227e5ad9fe3f8bee0fc6e9574afdd5c5710f79efd9bcb7e3d7fdfdf13a9cf4a9f4470279d0f6a
+  languageName: node
+  linkType: hard
+
+"@nestjs/common@npm:^11.0.7":
   version: 11.0.11
   resolution: "@nestjs/common@npm:11.0.11"
   dependencies:
@@ -2727,7 +2751,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@subql/node-stellar@workspace:packages/node"
   dependencies:
-    "@nestjs/common": ^11.0.11
+    "@nestjs/common": ^11.0.16
     "@nestjs/core": ^11.0.11
     "@nestjs/event-emitter": ^3.0.1
     "@nestjs/platform-express": ^11.0.11
