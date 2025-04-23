@@ -217,7 +217,6 @@ export class StellarApi implements ApiWrapper {
   }
 
   private wrapTransactionsForLedger(
-    sequence: number,
     transactions: Horizon.ServerApi.TransactionRecord[],
     operationsForSequence: Horizon.ServerApi.OperationRecord[],
     effectsForSequence: Horizon.ServerApi.EffectRecord[],
@@ -262,7 +261,6 @@ export class StellarApi implements ApiWrapper {
       const operations = this.wrapOperationsForTx(
         // TODO, this include other attribute from HorizonApi.TransactionResponse, but type assertion incorrect
         // TransactionRecord extends Omit<HorizonApi.TransactionResponse, "created_at">
-        // (tx as any).id,
         groupedOperations[tx.hash] ?? [],
         groupedEffects,
         groupedEvents[tx.hash] ?? [],
@@ -340,7 +338,6 @@ export class StellarApi implements ApiWrapper {
     };
 
     const wrapperTxs = this.wrapTransactionsForLedger(
-      sequence,
       transactions,
       operations,
       effects,
