@@ -182,13 +182,6 @@ export class StellarApi {
     effectsForSequence: Record<string, Horizon.ServerApi.EffectRecord[]>,
     events: SorobanEvent[],
   ): StellarOperation[] {
-    // If there are soroban events then there should only be a single operation.
-    // This check is here in case there are furture changes to the network.
-    assert(
-      events.length > 0 ? operations.length === 1 : true,
-      'Unable to assign events to multiple operations',
-    );
-
     return operations.map((op, index) => {
       const effects = (effectsForSequence[op.id] ?? []).map(
         this.wrapEffect.bind(this),
