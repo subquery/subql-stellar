@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 import assert from 'assert';
-import { Horizon } from '@stellar/stellar-sdk';
+import { Horizon, rpc } from '@stellar/stellar-sdk';
 import { getLogger, IBlock } from '@subql/node-core';
 import {
   SorobanEvent,
@@ -182,12 +182,14 @@ export class StellarApi {
     effectsForSequence: Record<string, Horizon.ServerApi.EffectRecord[]>,
     events: SorobanEvent[],
   ): StellarOperation[] {
-    // If there are soroban events then there should only be a single operation.
-    // This check is here in case there are furture changes to the network.
-    assert(
-      events.length > 0 ? operations.length === 1 : true,
-      'Unable to assign events to multiple operations',
-    );
+    const groupedEvts = events.reduce((acc, evt) => {
+      // Types are not correct, the evt also has a transactionIndex
+      const operationIndex = (evt as any).operationIndex as number;
+      acc[operationIndex] ??= [];
+      acc[operationIndex].push(evt);
+
+      return acc;
+    }, {} as Record<number, SorobanEvent[]>);
 
     return operations.map((op, index) => {
       const effects = (effectsForSequence[op.id] ?? []).map(
@@ -200,7 +202,7 @@ export class StellarApi {
         ledger: null,
         transaction: null,
         effects: [],
-        events,
+        events: groupedEvts[index] ?? [],
       };
 
       const clonedOp = cloneDeep(wrappedOp);
