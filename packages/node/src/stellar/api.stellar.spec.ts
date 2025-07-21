@@ -9,9 +9,12 @@ const SOROBAN_ENDPOINT = 'https://rpc-futurenet.stellar.org';
 
 jest.setTimeout(60000);
 
-const prepareStellarApi = async function () {
-  const soroban = new SorobanServer(SOROBAN_ENDPOINT);
-  const api = new StellarApi(HTTP_ENDPOINT, soroban);
+const prepareStellarApi = async function (
+  stellarEndpoint = HTTP_ENDPOINT,
+  sorobanEndpoint = SOROBAN_ENDPOINT,
+) {
+  const soroban = new SorobanServer(sorobanEndpoint);
+  const api = new StellarApi(stellarEndpoint, soroban);
   await api.init();
   return api;
 };
@@ -95,5 +98,31 @@ describe('StellarApi', () => {
     await expect((stellarApi as any).fetchAndWrapLedger(100)).rejects.toThrow(
       /(Gone|Not Found)/,
     );
+  });
+
+  it('handles a transaction with multiple operations and events', async () => {
+    const api = await prepareStellarApi(
+      'https://horizon-testnet.stellar.org',
+      'https://soroban-testnet.stellar.org',
+    );
+
+    const [block] = await api.fetchBlocks([466592]);
+
+    const tx = block.block.transactions.find(
+      (tx) =>
+        tx.hash ===
+        '7967828275a8ba2442a0d4d21e8052b77ec87e8601598173e8857ad96c135685',
+    );
+
+    expect(tx).toBeDefined();
+
+    expect(tx?.operations.length).toEqual(4);
+    expect(tx?.events.length).toEqual(2);
+
+    // Events should be correctly assigned to operations
+    expect(tx?.operations[0].events.length).toEqual(1);
+    expect(tx?.operations[1].events.length).toEqual(1);
+    expect(tx?.operations[2].events.length).toEqual(0);
+    expect(tx?.operations[3].events.length).toEqual(0);
   });
 });
