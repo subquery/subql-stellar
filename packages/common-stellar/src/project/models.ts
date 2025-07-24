@@ -1,7 +1,7 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import {Horizon} from '@stellar/stellar-sdk';
+import type {Horizon} from '@stellar/stellar-sdk';
 import {BaseDataSource, forbidNonWhitelisted, ProcessorImpl} from '@subql/common';
 import {Processor, FileReference} from '@subql/types-core';
 import {
