@@ -154,4 +154,20 @@ describe('SorobanServer', () => {
     expect((server as any).eventsCache[2]).toBeUndefined();
     expect(spy).toHaveBeenCalledTimes(1);
   });
+
+  it('does pagination correctly', async () => {
+    const legerNum = 58627181;
+    server = new SorobanServer('https://stellar.api.onfinality.io/public/rpc');
+    const spy = jest.spyOn(server as any, 'fetchEventsForSequence');
+    const events = await server.getEvents({
+      startLedger: legerNum,
+      filters: [],
+    });
+
+    expect(events).toBeDefined();
+    expect(events.events.every((evt) => evt.ledger === legerNum)).toBeTruthy();
+    expect(events.events.length).toEqual(160);
+
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
 });

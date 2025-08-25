@@ -35,7 +35,9 @@ export class SorobanServer extends rpc.Server {
     // Update the accumulated events with the events from the current sequence
     const newEvents = accEvents.concat(events);
 
+    // Gone over the current sequence, we must have all events
     if (eventsToCache?.length) {
+      // Exclude the events to cache from the last sequence, we probably don't have all the events for that sequence so we discard them
       if (response.events.length === pageLimit) {
         const lastSequence = last(response.events)!.ledger;
         eventsToCache = eventsToCache.filter(
@@ -50,19 +52,14 @@ export class SorobanServer extends rpc.Server {
         },
       };
     }
-
-    if (response.events.length < pageLimit) {
-      return {
-        events: { events: newEvents, latestLedger: response.latestLedger },
-        eventsToCache: { events: [], latestLedger: response.latestLedger },
-      };
-    }
+    // We cannot check response.events.length < pageLimit here because the server may have a pageLimit below ours that it will use.
 
     // Prepare the next request
     const nextRequest = {
       ...request,
-      cursor: response.events[response.events.length - 1]?.pagingToken,
+      cursor: response.cursor,
       startLedger: undefined,
+      endLedger: undefined,
     };
 
     // Continue fetching events for the sequence
@@ -99,6 +96,9 @@ export class SorobanServer extends rpc.Server {
     if (sequence === undefined) {
       throw new Error(`Get soraban event failed, block sequence is missing`);
     }
+
+    // Set a limit on the request range, endLedger is exclusive
+    request.endLedger = request.endLedger ?? sequence + 1;
 
     if (this.eventsCache[sequence]) {
       const cachedEvents = this.eventsCache[sequence];

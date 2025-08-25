@@ -2245,12 +2245,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:^1.9.2":
-  version: 1.9.4
-  resolution: "@noble/curves@npm:1.9.4"
+"@noble/curves@npm:^1.9.6":
+  version: 1.9.7
+  resolution: "@noble/curves@npm:1.9.7"
   dependencies:
     "@noble/hashes": 1.8.0
-  checksum: 464813a81982ad670d2ae38452eea389066cf3b8d976ec2992dfa7c47b809a3703e7cf4f0915c559792fff97284563176e2ac5d06c353434292789404cbfc3dd
+  checksum: 65acad44ac6944ab96471109087d6cfcbcaa251faad6295961be9a5ace220634f4b7c74a96d1ee2274ad3880ea953d8e8259893ed8c906c831ef29f5c04ec9cc
   languageName: node
   linkType: hard
 
@@ -2663,25 +2663,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stellar/stellar-base@npm:^14.0.0-rc.2":
-  version: 14.0.0-rc.2
-  resolution: "@stellar/stellar-base@npm:14.0.0-rc.2"
+"@stellar/stellar-base@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "@stellar/stellar-base@npm:14.0.0"
   dependencies:
-    "@noble/curves": ^1.9.2
+    "@noble/curves": ^1.9.6
     "@stellar/js-xdr": ^3.1.2
     base32.js: ^0.1.0
-    bignumber.js: ^9.3.0
+    bignumber.js: ^9.3.1
     buffer: ^6.0.3
-    sha.js: ^2.3.6
-  checksum: 212d34fd5f4cab060a6ffb3ddf78be5337457a53d61a3c5649fce7e9a05d97c57e6a82687cbacb20d66400c63b382a4d28a1a6980a9f6fb255d75b6644117bf3
+    sha.js: ^2.4.12
+  checksum: d51f8171dd0152946b96d94f1ef9a8476f69bd7c44781fdd15bfc99bd3d487a7c2c848ad4cd30e0c3f035c08e9841551d86e0743888cf218d88abd9faac2a26b
   languageName: node
   linkType: hard
 
-"@stellar/stellar-sdk@npm:14.0.0-rc.3":
-  version: 14.0.0-rc.3
-  resolution: "@stellar/stellar-sdk@npm:14.0.0-rc.3"
+"@stellar/stellar-sdk@npm:^14.1.0":
+  version: 14.1.0
+  resolution: "@stellar/stellar-sdk@npm:14.1.0"
   dependencies:
-    "@stellar/stellar-base": ^14.0.0-rc.2
+    "@stellar/stellar-base": ^14.0.0
     axios: ^1.8.4
     bignumber.js: ^9.3.1
     eventsource: ^2.0.2
@@ -2689,7 +2689,7 @@ __metadata:
     randombytes: ^2.1.0
     toml: ^3.0.0
     urijs: ^1.19.1
-  checksum: b323a2c6c2b25aa87783fe60f8da96467766e7d920653c428d302a50e731ff0903a14157323d377749e27bce3aa53150959d5762df8ae68b30f278c8d91c1f1f
+  checksum: 6670da631649c792cf42150d70fcb997babdaf9c88f240e3d59af9e5b726874bc0978ed09aed38c319cbaaf6672429194233d998f69e8edad5d78a097af3add8
   languageName: node
   linkType: hard
 
@@ -2697,7 +2697,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@subql/common-stellar@workspace:packages/common-stellar"
   dependencies:
-    "@stellar/stellar-sdk": 14.0.0-rc.3
+    "@stellar/stellar-sdk": ^14.1.0
     "@subql/common": ^5.7.0
     "@subql/types-stellar": "workspace:*"
     "@types/js-yaml": ^4.0.4
@@ -2771,7 +2771,7 @@ __metadata:
     "@nestjs/schedule": ^5.0.1
     "@nestjs/schematics": ^11.0.2
     "@nestjs/testing": ^11.0.11
-    "@stellar/stellar-sdk": 14.0.0-rc.3
+    "@stellar/stellar-sdk": ^14.1.0
     "@subql/common": ^5.7.0
     "@subql/common-stellar": "workspace:*"
     "@subql/node-core": ^18.2.0
@@ -2832,7 +2832,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@subql/types-stellar@workspace:packages/types"
   dependencies:
-    "@stellar/stellar-sdk": 14.0.0-rc.3
+    "@stellar/stellar-sdk": ^14.1.0
     "@subql/types-core": ^2.1.0
   languageName: unknown
   linkType: soft
@@ -4175,7 +4175,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bignumber.js@npm:^9.3.0, bignumber.js@npm:^9.3.1":
+"bignumber.js@npm:^9.3.1":
   version: 9.3.1
   resolution: "bignumber.js@npm:9.3.1"
   checksum: 6ab100271a23a75bb8b99a4b1a34a1a94967ac0b9a52a198147607bd91064e72c6f356380d7a09cd687bf50d81ad2ed1a0a8edfaa90369c9003ed8bb2440d7f0
@@ -10541,7 +10541,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sha.js@npm:^2.3.6":
+"sha.js@npm:^2.4.12":
   version: 2.4.12
   resolution: "sha.js@npm:2.4.12"
   dependencies:
