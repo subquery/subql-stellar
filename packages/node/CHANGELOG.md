@@ -5,9 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.1.0] - 2025-08-26
 ### Changed
-- Update Stellar SDK to support protocol 23 (#135)
-- Update Stellar SDK to v14 with support for protocol 23 (#138)
+- Update Stellar SDK to v14 with support for protocol 23 (#135) (#138)
 
 ### Fixed
 - Pagination for getting events which used the deprecated pagingToken, it now uses the cursor (#138)
@@ -243,7 +244,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - rename `soroban` to `sorobanEndpoint` in network config (#16)
 
 ## [2.12.0] - 2023-09-12
-[Unreleased]: https://github.com/subquery/subql-stellar/compare/node-stellar/6.0.2...HEAD
+[Unreleased]: https://github.com/subquery/subql-stellar/compare/node-stellar/6.1.0...HEAD
+[6.1.0]: https://github.com/subquery/subql-stellar/compare/node-stellar/6.0.2...node-stellar/6.1.0
 [6.0.2]: https://github.com/subquery/subql-stellar/compare/node-stellar/6.0.1...node-stellar/6.0.2
 [6.0.1]: https://github.com/subquery/subql-stellar/compare/node-stellar/6.0.0...node-stellar/6.0.1
 [6.0.0]: https://github.com/subquery/subql-stellar/compare/node-stellar/5.0.2...node-stellar/6.0.0
