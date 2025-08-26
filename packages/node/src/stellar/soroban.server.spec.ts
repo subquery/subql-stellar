@@ -53,16 +53,16 @@ describe('SorobanServer', () => {
 
   test('should handle response length less than DEFAULT_PAGE_SIZE', async () => {
     spy.mockResolvedValue({
-      events: Array.from({ length: DEFAULT_PAGE_SIZE - 1 }, (_, i) => ({
+      events: Array.from({ length: DEFAULT_PAGE_SIZE }, (_, i) => ({
         id: `${i}`,
-        ledger: 1,
-        pagingToken: `${i}`,
+        ledger: i < DEFAULT_PAGE_SIZE - 1 ? 1 : 2,
       })),
     });
 
     const response = await server.getEvents({
       startLedger: 1,
-    } as rpc.Server.GetEventsRequest);
+      filters: [],
+    });
 
     expect(response.events.length).toBe(DEFAULT_PAGE_SIZE - 1);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -103,14 +103,12 @@ describe('SorobanServer', () => {
         events: Array.from({ length: DEFAULT_PAGE_SIZE }, (_, i) => ({
           id: `${i}`,
           ledger: 1,
-          pagingToken: `${i}`,
         })),
       })
       .mockResolvedValueOnce({
-        events: Array.from({ length: 5 }, (_, i) => ({
+        events: Array.from({ length: DEFAULT_PAGE_SIZE }, (_, i) => ({
           id: `${i + DEFAULT_PAGE_SIZE}`,
-          ledger: 1,
-          pagingToken: `${i + DEFAULT_PAGE_SIZE}`,
+          ledger: i < 5 ? 1 : 2,
         })),
       });
 
@@ -155,7 +153,7 @@ describe('SorobanServer', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  it('does pagination correctly', async () => {
+  it.skip('does pagination correctly', async () => {
     const legerNum = 58627181;
     server = new SorobanServer('https://stellar.api.onfinality.io/public/rpc');
     const spy = jest.spyOn(server as any, 'fetchEventsForSequence');

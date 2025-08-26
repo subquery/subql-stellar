@@ -53,6 +53,12 @@ export class SorobanServer extends rpc.Server {
       };
     }
     // We cannot check response.events.length < pageLimit here because the server may have a pageLimit below ours that it will use.
+    if (response.events.length === 0) {
+      return {
+        events: { events: newEvents, latestLedger: response.latestLedger },
+        eventsToCache: { events: [], latestLedger: response.latestLedger },
+      };
+    }
 
     // Prepare the next request
     const nextRequest = {
