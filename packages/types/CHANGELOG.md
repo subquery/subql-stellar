@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Update Stellar SDK to support protocol 23 (#135)
+- Update Stellar SDK to v14 with support for protocol 23 (#138)
 
 ## [5.0.1] - 2025-07-01
 ### Changed
