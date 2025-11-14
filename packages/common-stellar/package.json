@@ -17,7 +17,7 @@
     "@stellar/stellar-sdk": "^14.1.0",
     "@subql/common": "^5.7.0",
     "@subql/types-stellar": "workspace:*",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "pino": "^6.13.3",
     "reflect-metadata": "^0.1.13"
   },
