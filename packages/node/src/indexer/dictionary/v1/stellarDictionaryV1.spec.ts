@@ -1,24 +1,16 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NETWORK_FAMILY } from '@subql/common';
-import { DictionaryService, NodeConfig } from '@subql/node-core';
-import {
-  StellarDatasourceKind,
-  StellarHandlerKind,
-  SubqlRuntimeDatasource,
-} from '@subql/types-stellar';
-import { MetaData } from '@subql/utils';
-import {
-  StellarDictionaryV1,
-  buildDictionaryQueryEntries,
-} from './stellarDictionaryV1';
+import {EventEmitter2} from '@nestjs/event-emitter';
+import {NETWORK_FAMILY} from '@subql/common';
+import {DictionaryService, NodeConfig} from '@subql/node-core';
+import {StellarDatasourceKind, StellarHandlerKind, SubqlRuntimeDatasource} from '@subql/types-stellar';
+import {MetaData} from '@subql/utils';
+import {StellarDictionaryV1, buildDictionaryQueryEntries} from './stellarDictionaryV1';
 
 const nodeConfig = {
   dictionaryTimeout: 10000,
-  dictionaryRegistry:
-    'https://github.com/subquery/templates/raw/main/dist/dictionary.json',
+  dictionaryRegistry: 'https://github.com/subquery/templates/raw/main/dist/dictionary.json',
 } as NodeConfig;
 const project = {
   network: {
@@ -97,44 +89,6 @@ describe('buildDictionaryQueryEntries', () => {
     ]);
   });
 
-  it('should correctly build dictionary query entries for effects', () => {
-    const ds: SubqlRuntimeDatasource = {
-      kind: StellarDatasourceKind.Runtime,
-      startBlock: 1,
-      mapping: {
-        file: '',
-        handlers: [
-          {
-            handler: 'handleEffects',
-            kind: StellarHandlerKind.Effects,
-            filter: {
-              account: 'effect_account',
-              type: 'effect_type',
-            },
-          },
-        ],
-      },
-    };
-    const result = buildDictionaryQueryEntries([ds]);
-    expect(result).toEqual([
-      {
-        entity: 'effects',
-        conditions: [
-          {
-            field: 'type',
-            value: 'effect_type',
-            matcher: 'equalTo',
-          },
-          {
-            field: 'account',
-            value: 'effect_account',
-            matcher: 'equalTo',
-          },
-        ],
-      },
-    ]);
-  });
-
   it('should return an empty array when no filters are provided', () => {
     const ds: SubqlRuntimeDatasource = {
       kind: StellarDatasourceKind.Runtime,
@@ -160,25 +114,14 @@ class TestDictionaryService extends DictionaryService<any, any> {
     return Promise.resolve(undefined);
   }
   async getRegistryDictionaries(chainId: string): Promise<string[]> {
-    return this.resolveDictionary(
-      NETWORK_FAMILY.near,
-      chainId,
-      this.nodeConfig.dictionaryRegistry,
-    );
+    return this.resolveDictionary(NETWORK_FAMILY.near, chainId, this.nodeConfig.dictionaryRegistry);
   }
 }
 describe('dictionary v1', () => {
   let dictionary: StellarDictionaryV1;
   beforeEach(async () => {
-    const testDictionaryService = new TestDictionaryService(
-      project.network.chainId,
-      nodeConfig,
-      new EventEmitter2(),
-    );
-    const dictionaryEndpoints =
-      await testDictionaryService.getRegistryDictionaries(
-        project.network.chainId,
-      );
+    const testDictionaryService = new TestDictionaryService(project.network.chainId, nodeConfig, new EventEmitter2());
+    const dictionaryEndpoints = await testDictionaryService.getRegistryDictionaries(project.network.chainId);
     dictionary = await StellarDictionaryV1.create(
       {
         network: {
@@ -186,7 +129,7 @@ describe('dictionary v1', () => {
           dictionary: dictionaryEndpoints[1],
         },
       } as any,
-      { dictionaryTimeout: 10000 } as NodeConfig,
+      {dictionaryTimeout: 10000} as NodeConfig,
       jest.fn(),
       dictionaryEndpoints[1], // use endpoint from network
     );

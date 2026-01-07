@@ -1,17 +1,16 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import {Inject, Injectable} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {EventEmitter2} from '@nestjs/event-emitter';
 import {StellarProjectNetworkConfig} from '@subql/common-stellar';
 import {ApiService, ConnectionPoolService, getLogger, IBlock, exitWithError, NodeConfig} from '@subql/node-core';
 import {IEndpointConfig} from '@subql/types-core';
-import {StellarBlockWrapper, SubqlDatasource, IStellarEndpointConfig} from '@subql/types-stellar';
-import {SubqueryProject, dsHasSorobanEventHandler} from '../configure/SubqueryProject';
+import {StellarBlockWrapper, IStellarEndpointConfig} from '@subql/types-stellar';
+import {SubqueryProject} from '../configure/SubqueryProject';
 import {StellarApiConnection} from './api.connection';
 import {StellarApi} from './api.stellar';
 import SafeStellarProvider from './safe-api';
-import {SorobanServer} from './soroban.server';
 
 const logger = getLogger('api');
 
@@ -48,32 +47,8 @@ export class StellarApiService extends ApiService<
       (network.endpoint as Record<string, IEndpointConfig>)[endpoint] = config;
     }
 
-    const sorobanEndpoint: string | undefined = network.sorobanEndpoint;
-
-    if (!network.sorobanEndpoint && sorobanEndpoint) {
-      //update sorobanEndpoint from parent project
-      project.network.sorobanEndpoint = sorobanEndpoint;
-    }
-
-    // TOOD if project upgrades introduces new datasoruces this wont work
-    if (
-      dsHasSorobanEventHandler([...project.dataSources, ...(project.templates as SubqlDatasource[])]) &&
-      !sorobanEndpoint
-    ) {
-      throw new Error(`Soroban network endpoint must be provided for network. chainId="${project.network.chainId}"`);
-    }
-
-    const {protocol} = new URL(sorobanEndpoint);
-    const protocolStr = protocol.replace(':', '');
-
-    const sorobanClient = sorobanEndpoint
-      ? new SorobanServer(sorobanEndpoint, {
-          allowHttp: protocolStr === 'http',
-        })
-      : undefined;
-
     await apiService.createConnections(network, (endpoint, config) =>
-      StellarApiConnection.create(endpoint, apiService.fetchBlockBatches.bind(apiService), sorobanClient, config),
+      StellarApiConnection.create(apiService.fetchBlockBatches.bind(apiService), endpoint, config),
     );
 
     return apiService;

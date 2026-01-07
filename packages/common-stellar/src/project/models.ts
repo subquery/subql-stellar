@@ -1,13 +1,13 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import type {Horizon} from '@stellar/stellar-sdk';
+import type {xdr} from '@stellar/stellar-sdk';
 import {BaseDataSource, forbidNonWhitelisted, ProcessorImpl} from '@subql/common';
 import {Processor, FileReference} from '@subql/types-core';
 import {
   StellarHandlerKind,
   StellarDatasourceKind,
-  SorobanEventFilter,
+  StellarEventFilter,
   SubqlCustomHandler,
   SubqlMapping,
   SubqlHandler,
@@ -17,13 +17,10 @@ import {
   StellarBlockFilter,
   StellarTransactionFilter,
   StellarOperationFilter,
-  StellarEffectFilter,
   SubqlBlockHandler,
   SubqlTransactionHandler,
   SubqlOperationHandler,
-  SubqlEffectHandler,
   SubqlEventHandler,
-  SubqlSorobanTransactionHandler,
 } from '@subql/types-stellar';
 import {plainToClass, Transform, Type} from 'class-transformer';
 import {IsArray, IsEnum, IsInt, IsOptional, IsString, IsObject, ValidateNested} from 'class-validator';
@@ -46,21 +43,11 @@ export class TransactionFilter implements StellarTransactionFilter {
 
 export class OperationFilter implements StellarOperationFilter {
   @IsOptional()
-  type!: Horizon.HorizonApi.OperationResponseType;
+  type!: xdr.OperationType['name'];
 
   @IsOptional()
   @IsString()
   sourceAccount?: string;
-}
-
-export class EffectFilter implements StellarEffectFilter {
-  @IsOptional()
-  @IsString()
-  type?: string;
-
-  @IsOptional()
-  @IsString()
-  account?: string;
 }
 
 export class BlockHandler implements SubqlBlockHandler {
@@ -86,18 +73,6 @@ export class TransactionHandler implements SubqlTransactionHandler {
   handler!: string;
 }
 
-export class SorobanTransactionHandler implements SubqlSorobanTransactionHandler {
-  @forbidNonWhitelisted({account: ''})
-  @IsObject()
-  @IsOptional()
-  @Type(() => TransactionFilter)
-  filter?: TransactionFilter;
-  @IsEnum(StellarHandlerKind, {groups: [StellarHandlerKind.SorobanTransaction]})
-  kind!: StellarHandlerKind.SorobanTransaction;
-  @IsString()
-  handler!: string;
-}
-
 export class OperationHandler implements SubqlOperationHandler {
   @forbidNonWhitelisted({type: '', sourceAccount: ''})
   @IsObject()
@@ -110,19 +85,7 @@ export class OperationHandler implements SubqlOperationHandler {
   handler!: string;
 }
 
-export class EffectHandler implements SubqlEffectHandler {
-  @forbidNonWhitelisted({type: '', account: ''})
-  @IsObject()
-  @IsOptional()
-  @Type(() => EffectFilter)
-  filter?: EffectFilter;
-  @IsEnum(StellarHandlerKind, {groups: [StellarHandlerKind.Effects]})
-  kind!: StellarHandlerKind.Effects;
-  @IsString()
-  handler!: string;
-}
-
-export class EventFilter implements SorobanEventFilter {
+export class EventFilter implements StellarEventFilter {
   @IsOptional()
   @IsString()
   contractId?: string;
@@ -136,7 +99,7 @@ export class EventHandler implements SubqlEventHandler {
   @IsOptional()
   @ValidateNested()
   @Type(() => EventFilter)
-  filter?: SorobanEventFilter;
+  filter?: StellarEventFilter;
   @IsEnum(StellarHandlerKind, {groups: [StellarHandlerKind.Event]})
   kind!: StellarHandlerKind.Event;
   @IsString()
@@ -162,12 +125,8 @@ export class StellarMapping implements SubqlMapping {
           return plainToClass(BlockHandler, handler);
         case StellarHandlerKind.Transaction:
           return plainToClass(TransactionHandler, handler);
-        case StellarHandlerKind.SorobanTransaction:
-          return plainToClass(SorobanTransactionHandler, handler);
         case StellarHandlerKind.Operation:
           return plainToClass(OperationHandler, handler);
-        case StellarHandlerKind.Effects:
-          return plainToClass(EffectHandler, handler);
         case StellarHandlerKind.Event:
           return plainToClass(EventHandler, handler);
         default:

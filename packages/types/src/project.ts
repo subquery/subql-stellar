@@ -1,7 +1,7 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import {Horizon} from '@stellar/stellar-sdk';
+import type {rpc} from '@stellar/stellar-sdk';
 import {
   BaseTemplateDataSource,
   IProjectNetworkConfig,
@@ -19,16 +19,14 @@ import {
   IEndpointConfig,
 } from '@subql/types-core';
 import {
-  StellarBlock,
   StellarBlockFilter,
-  StellarEffect,
-  StellarEffectFilter,
-  SorobanEvent,
-  SorobanEventFilter,
-  StellarOperation,
+  StellarEventFilter,
   StellarOperationFilter,
-  StellarTransaction,
   StellarTransactionFilter,
+  StellarOperation,
+  StellarTransaction,
+  StellarBlock,
+  StellarEvent,
 } from './stellar';
 
 export type RuntimeDatasourceTemplate = BaseTemplateDataSource<SubqlRuntimeDatasource>;
@@ -61,17 +59,9 @@ export enum StellarHandlerKind {
    */
   Transaction = 'stellar/TransactionHandler',
   /**
-   * Handler for Soroban Transactions.
-   */
-  SorobanTransaction = 'soroban/TransactionHandler',
-  /**
    * Handler for Stellar Operations.
    */
   Operation = 'stellar/OperationHandler',
-  /**
-   * Handler for Stellar Effects.
-   */
-  Effects = 'stellar/EffectHandler',
   /**
    * Handler for Soroban Events.
    */
@@ -81,19 +71,15 @@ export enum StellarHandlerKind {
 export type StellarRuntimeHandlerInputMap = {
   [StellarHandlerKind.Block]: StellarBlock;
   [StellarHandlerKind.Transaction]: StellarTransaction;
-  [StellarHandlerKind.SorobanTransaction]: StellarTransaction;
   [StellarHandlerKind.Operation]: StellarOperation;
-  [StellarHandlerKind.Effects]: StellarEffect;
-  [StellarHandlerKind.Event]: SorobanEvent;
+  [StellarHandlerKind.Event]: StellarEvent;
 };
 
 type StellarRuntimeFilterMap = {
   [StellarHandlerKind.Block]: StellarBlockFilter;
   [StellarHandlerKind.Transaction]: StellarTransactionFilter;
-  [StellarHandlerKind.SorobanTransaction]: StellarTransactionFilter;
-  [StellarHandlerKind.Effects]: StellarEffectFilter;
   [StellarHandlerKind.Operation]: StellarOperationFilter;
-  [StellarHandlerKind.Event]: SorobanEventFilter;
+  [StellarHandlerKind.Event]: StellarEventFilter;
 };
 
 /**
@@ -116,15 +102,15 @@ export interface SubqlTransactionHandler {
   filter?: StellarTransactionFilter;
 }
 
-/**
- * Represents a handler for Soroban transactions.
- * @type {SubqlCustomHandler<StellarHandlerKind.SorobanTransaction, StellarTransactionFilter>}
- */
-export interface SubqlSorobanTransactionHandler {
-  handler: string;
-  kind: StellarHandlerKind.SorobanTransaction;
-  filter?: StellarTransactionFilter;
-}
+// /**
+//  * Represents a handler for Soroban transactions.
+//  * @type {SubqlCustomHandler<StellarHandlerKind.SorobanTransaction, StellarTransactionFilter>}
+//  */
+// export interface SubqlSorobanTransactionHandler {
+//   handler: string;
+//   kind: StellarHandlerKind.SorobanTransaction;
+//   filter?: StellarTransactionFilter;
+// }
 
 /**
  * Represents a handler for Stellar operations.
@@ -137,23 +123,13 @@ export interface SubqlOperationHandler {
 }
 
 /**
- * Represents a handler for Stellar effects.
- * @type {SubqlCustomHandler<StellarHandlerKind.Effects, StellarEffectFilter>}
- */
-export interface SubqlEffectHandler {
-  handler: string;
-  kind: StellarHandlerKind.Effects;
-  filter?: StellarEffectFilter;
-}
-
-/**
  * Represents a handler for Soroban event.
- * @type {SubqlCustomHandler<StellarHandlerKind.Event, SorobanEventFilter>}
+ * @type {SubqlCustomHandler<StellarHandlerKind.Event, StellarEventFilter>}
  */
 export interface SubqlEventHandler {
   handler: string;
   kind: StellarHandlerKind.Event;
-  filter?: SorobanEventFilter;
+  filter?: StellarEventFilter;
 }
 
 /**
@@ -165,9 +141,9 @@ export interface SubqlEventHandler {
 
 export interface SubqlCustomHandler<K extends string = string, F = Record<string, unknown>> extends BaseHandler<F, K> {
   /**
-   * The kind of handler. For `stellar/Runtime` datasources this is either `Block`, `Transaction`, `Operation`, `Effect`  or `Event` kinds.
+   * The kind of handler. For `stellar/Runtime` datasources this is either `Block`, `Transaction`, `Operation` or `Event` kinds.
    * The value of this will determine the filter options as well as the data provided to your handler function
-   * @type {StellarHandlerKind.Block | StellarHandlerKind.Transaction | StellarHandlerKind.SorobanTransaction | StellarHandlerKind.Operation | StellarHandlerKind.Effects | SubstrateHandlerKind.Event | string }
+   * @type {StellarHandlerKind.Block | StellarHandlerKind.Transaction | StellarHandlerKind.SorobanTransaction | StellarHandlerKind.Operation | SubstrateHandlerKind.Event | string }
    * @example
    * kind: StellarHandlerFind.Block // Defined with an enum, this is used for runtime datasources
    */
@@ -183,15 +159,13 @@ export interface SubqlCustomHandler<K extends string = string, F = Record<string
 }
 
 /**
- * Represents a runtime handler for Stellar, which can be a block handler, transaction handler, operation handler, effect handler or event handler.
- * @type {SubqlBlockHandler | SubqlTransactionHandler | SubqlSorobanTransactionHandler | SubqlOperationHandler | SubqlEffectHandler | SubqlEventHandler}
+ * Represents a runtime handler for Stellar, which can be a block handler, transaction handler, operation handler or event handler.
+ * @type {SubqlBlockHandler | SubqlTransactionHandler | SubqlSorobanTransactionHandler | SubqlOperationHandler | SubqlEventHandler}
  */
 export type SubqlRuntimeHandler =
   | SubqlBlockHandler
   | SubqlTransactionHandler
-  | SubqlSorobanTransactionHandler
   | SubqlOperationHandler
-  | SubqlEffectHandler
   | SubqlEventHandler;
 
 /**
@@ -201,14 +175,13 @@ export type SubqlRuntimeHandler =
 export type SubqlHandler = SubqlRuntimeHandler | SubqlCustomHandler<string, unknown>;
 
 /**
- * Represents a filter for Stellar runtime handlers, which can be a block filter, transaction filter, operation filter, effects filter or event filter.
+ * Represents a filter for Stellar runtime handlers, which can be a block filter, transaction filter, operation filter or event filter.
  * @type {SubstrateBlockFilter | SubstrateCallFilter | SubstrateEventFilter}
  */
 export type SubqlHandlerFilter =
-  | SorobanEventFilter
+  | StellarEventFilter
   | StellarTransactionFilter
   | StellarOperationFilter
-  | StellarEffectFilter
   | StellarBlockFilter;
 
 /**
@@ -289,24 +262,8 @@ export type SecondLayerHandlerProcessor<
   E,
   DS extends SubqlCustomDatasource = SubqlCustomDatasource
 > =
-  | SecondLayerHandlerProcessor_0_0_0<
-      K,
-      StellarRuntimeHandlerInputMap,
-      StellarRuntimeFilterMap,
-      F,
-      E,
-      DS,
-      Horizon.Server
-    >
-  | SecondLayerHandlerProcessor_1_0_0<
-      K,
-      StellarRuntimeHandlerInputMap,
-      StellarRuntimeFilterMap,
-      F,
-      E,
-      DS,
-      Horizon.Server
-    >;
+  | SecondLayerHandlerProcessor_0_0_0<K, StellarRuntimeHandlerInputMap, StellarRuntimeFilterMap, F, E, DS, rpc.Server>
+  | SecondLayerHandlerProcessor_1_0_0<K, StellarRuntimeHandlerInputMap, StellarRuntimeFilterMap, F, E, DS, rpc.Server>;
 export type SecondLayerHandlerProcessorArray<
   K extends string,
   F extends Record<string, unknown>,
@@ -315,9 +272,7 @@ export type SecondLayerHandlerProcessorArray<
 > =
   | SecondLayerHandlerProcessor<StellarHandlerKind.Block, F, T, DS>
   | SecondLayerHandlerProcessor<StellarHandlerKind.Transaction, F, T, DS>
-  | SecondLayerHandlerProcessor<StellarHandlerKind.SorobanTransaction, F, T, DS>
   | SecondLayerHandlerProcessor<StellarHandlerKind.Operation, F, T, DS>
-  | SecondLayerHandlerProcessor<StellarHandlerKind.Effects, F, T, DS>
   | SecondLayerHandlerProcessor<StellarHandlerKind.Event, F, T, DS>;
 
 export type SubqlDatasourceProcessor<
@@ -328,7 +283,7 @@ export type SubqlDatasourceProcessor<
     string,
     SecondLayerHandlerProcessorArray<K, F, any, DS>
   >
-> = DsProcessor<DS, P, Horizon.Server>;
+> = DsProcessor<DS, P, rpc.Server>;
 
 export interface IStellarEndpointConfig extends IEndpointConfig {
   /**
@@ -346,9 +301,7 @@ export interface IStellarEndpointConfig extends IEndpointConfig {
  * Represents a Stellar subquery network configuration, which is based on the CommonSubqueryNetworkConfig template.
  * @type {IProjectNetworkConfig}
  */
-export type StellarNetworkConfig = IProjectNetworkConfig<IStellarEndpointConfig> & {
-  sorobanEndpoint?: string;
-};
+export type StellarNetworkConfig = IProjectNetworkConfig<IStellarEndpointConfig>;
 
 /**
  * Represents a Stellar project configuration based on the CommonSubqueryProject template.

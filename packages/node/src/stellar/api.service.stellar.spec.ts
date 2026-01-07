@@ -1,29 +1,25 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import { INestApplication } from '@nestjs/common';
-import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
-import { Test } from '@nestjs/testing';
-import { scValToNative } from '@stellar/stellar-sdk';
-import { ConnectionPoolService, NodeConfig } from '@subql/node-core';
-import { ConnectionPoolStateManager } from '@subql/node-core/dist';
-import { GraphQLSchema } from 'graphql';
-import { range } from 'lodash';
-import { SubqueryProject } from '../configure/SubqueryProject';
-import { StellarApiService } from './api.service.stellar';
-import { StellarApi } from './api.stellar';
+import {INestApplication} from '@nestjs/common';
+import {EventEmitter2, EventEmitterModule} from '@nestjs/event-emitter';
+import {Test} from '@nestjs/testing';
+import {scValToNative} from '@stellar/stellar-sdk';
+import {ConnectionPoolService, NodeConfig} from '@subql/node-core';
+import {ConnectionPoolStateManager} from '@subql/node-core/dist';
+import {GraphQLSchema} from 'graphql';
+import {range} from 'lodash';
+import {SubqueryProject} from '../configure/SubqueryProject';
+import {StellarApiService} from './api.service.stellar';
+import {StellarApi} from './api.stellar';
 
-const HTTP_ENDPOINT = 'https://horizon-futurenet.stellar.org';
+// const HTTP_ENDPOINT = 'https://horizon-futurenet.stellar.org';
 const SOROBAN_ENDPOINT = 'https://rpc-futurenet.stellar.org';
 
-function testSubqueryProject(
-  endpoint: string,
-  sorobanEndpoint: string,
-): SubqueryProject {
+function testSubqueryProject(endpoint: string): SubqueryProject {
   return {
     network: {
       endpoint: [endpoint],
-      sorobanEndpoint,
       chainId: 'Test SDF Future Network ; October 2022',
     },
     dataSources: [],
@@ -35,8 +31,7 @@ function testSubqueryProject(
 }
 
 const prepareApiService = async (
-  endpoint: string = HTTP_ENDPOINT,
-  soroban: string = SOROBAN_ENDPOINT,
+  endpoint: string = SOROBAN_ENDPOINT,
   project?: SubqueryProject,
 ): Promise<[StellarApiService, INestApplication]> => {
   const module = await Test.createTestingModule({
@@ -53,17 +48,12 @@ const prepareApiService = async (
       },
       {
         provide: 'ISubqueryProject',
-        useFactory: () => project ?? testSubqueryProject(endpoint, soroban),
+        useFactory: () => project ?? testSubqueryProject(endpoint),
       },
       {
         provide: StellarApiService,
         useFactory: StellarApiService.create.bind(StellarApiService),
-        inject: [
-          'ISubqueryProject',
-          ConnectionPoolService,
-          EventEmitter2,
-          NodeConfig,
-        ],
+        inject: ['ISubqueryProject', ConnectionPoolService, EventEmitter2, NodeConfig],
       },
     ],
     imports: [EventEmitterModule.forRoot()],
@@ -85,9 +75,7 @@ describe('StellarApiService', () => {
   });
 
   it('should allow http protocol for soroban endpoint', async () => {
-    await expect(
-      prepareApiService(HTTP_ENDPOINT, 'http://rpc-futurenet.stellar.org'),
-    ).resolves.not.toThrow();
+    await expect(prepareApiService('http://rpc-futurenet.stellar.org')).resolves.not.toThrow();
   });
 
   it('should instantiate api', () => {
@@ -96,42 +84,30 @@ describe('StellarApiService', () => {
 
   it('should fetch blocks', async () => {
     const latestHeight = await apiService.api.getFinalizedBlockHeight();
-    const blocks = await apiService.fetchBlocks(
-      range(latestHeight - 1, latestHeight),
-    );
+    const blocks = await apiService.fetchBlocks(range(latestHeight - 1, latestHeight));
     expect(blocks).toBeDefined();
     expect(blocks[0].block.block.sequence).toEqual(latestHeight - 1);
   });
 
   it('should throw error when chainId does not match', async () => {
     const faultyProject = {
-      ...testSubqueryProject(HTTP_ENDPOINT, SOROBAN_ENDPOINT),
+      ...testSubqueryProject(SOROBAN_ENDPOINT),
       network: {
-        ...testSubqueryProject(HTTP_ENDPOINT, SOROBAN_ENDPOINT).network,
+        ...testSubqueryProject(SOROBAN_ENDPOINT).network,
         chainId: 'Incorrect ChainId',
       },
     };
 
-    await expect(
-      prepareApiService(
-        HTTP_ENDPOINT,
-        SOROBAN_ENDPOINT,
-        faultyProject as unknown as SubqueryProject,
-      ),
-    ).rejects.toThrow();
+    await expect(prepareApiService(SOROBAN_ENDPOINT, faultyProject as unknown as SubqueryProject)).rejects.toThrow();
   });
 
   it('fails after maximum retries', async () => {
     const api = apiService.unsafeApi;
 
     // Mock the fetchBlocks method to always throw an error
-    (api as any).fetchBlocks = jest
-      .fn()
-      .mockRejectedValue(new Error('Network error'));
+    (api as any).fetchBlocks = jest.fn().mockRejectedValue(new Error('Network error'));
 
-    await expect(
-      (api as any).fetchBlocks(range(50000, 50100)),
-    ).rejects.toThrow();
+    await expect((api as any).fetchBlocks(range(50000, 50100))).rejects.toThrow();
   });
 });
 
@@ -141,14 +117,10 @@ describe.skip('testnet StellarApiService', () => {
   let apiService: StellarApiService;
   let app: INestApplication;
 
-  function testSubqueryProject2(
-    endpoint: string,
-    sorobanEndpoint: string,
-  ): SubqueryProject {
+  function testSubqueryProject2(endpoint: string): SubqueryProject {
     return {
       network: {
         endpoint: [endpoint],
-        sorobanEndpoint,
         chainId: 'Test SDF Network ; September 2015',
       },
       dataSources: [],
@@ -161,12 +133,8 @@ describe.skip('testnet StellarApiService', () => {
 
   beforeEach(async () => {
     [apiService, app] = await prepareApiService(
-      'https://horizon-testnet.stellar.org',
       'https://soroban-testnet.stellar.org',
-      testSubqueryProject2(
-        'https://horizon-testnet.stellar.org',
-        'https://soroban-testnet.stellar.org',
-      ),
+      testSubqueryProject2('https://soroban-testnet.stellar.org'),
     );
   });
 
@@ -175,11 +143,9 @@ describe.skip('testnet StellarApiService', () => {
     expect(blocks).toBeDefined();
 
     const block228236 = blocks[0];
-    const transferEvent = block228236.block.events?.find(
-      (e) => e.id === '0000980266155778048-0000000001',
-    );
+    const transferEvent = block228236.block.events?.find((e) => e.event.id === '0000980266155778048-0000000001');
 
-    const [sys, from, to] = transferEvent!.topic;
+    const [sys, from, to] = transferEvent!.event.topic;
     const decodedFrom = scValToNative(from).toString();
     const decodedTo = scValToNative(to).toString();
 

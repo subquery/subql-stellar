@@ -6,32 +6,24 @@ import {
   SubqlStellarDataSource,
   StellarTransactionFilter,
   StellarOperationFilter,
-  StellarEffectFilter,
   SubqlStellarProcessorOptions,
 } from '@subql/common-stellar';
-import {
-  NodeConfig,
-  DictionaryV1,
-  getLogger,
-  DsProcessorService,
-} from '@subql/node-core';
+import {NodeConfig, DictionaryV1, getLogger, DsProcessorService} from '@subql/node-core';
 import {
   DictionaryQueryCondition,
   DictionaryQueryEntry,
   DictionaryQueryEntry as DictionaryV1QueryEntry,
 } from '@subql/types-core';
 
-import { SorobanEventFilter, SubqlDatasource } from '@subql/types-stellar';
-import { sortBy, uniqBy } from 'lodash';
-import { SubqueryProject } from '../../../configure/SubqueryProject';
-import { yargsOptions } from '../../../yargs';
+import {StellarEventFilter, SubqlDatasource} from '@subql/types-stellar';
+import {sortBy, uniqBy} from 'lodash';
+import {SubqueryProject} from '../../../configure/SubqueryProject';
+import {yargsOptions} from '../../../yargs';
 
 type GetDsProcessor = DsProcessorService['getDsProcessor'];
 
 const logger = getLogger('DictionaryService');
-function transactionFilterToQueryEntry(
-  filter: StellarTransactionFilter,
-): DictionaryQueryEntry {
+function transactionFilterToQueryEntry(filter: StellarTransactionFilter): DictionaryQueryEntry {
   const conditions: DictionaryQueryCondition[] = [];
 
   if (filter.account) {
@@ -47,9 +39,7 @@ function transactionFilterToQueryEntry(
   };
 }
 
-function operationFilterToQueryEntry(
-  filter: StellarOperationFilter,
-): DictionaryQueryEntry {
+function operationFilterToQueryEntry(filter: StellarOperationFilter): DictionaryQueryEntry {
   const conditions: DictionaryQueryCondition[] = [];
 
   if (filter.type) {
@@ -72,32 +62,8 @@ function operationFilterToQueryEntry(
   };
 }
 
-function effectFilterToQueryEntry(
-  filter: StellarEffectFilter,
-): DictionaryQueryEntry {
-  const conditions: DictionaryQueryCondition[] = [];
-
-  if (filter.type) {
-    conditions.push({
-      field: 'type',
-      value: filter.type.toLowerCase(),
-      matcher: 'equalTo',
-    });
-  }
-  if (filter.account) {
-    conditions.push({
-      field: 'account',
-      value: filter.account.toLowerCase(),
-      matcher: 'equalTo',
-    });
-  }
-  return {
-    entity: 'effects',
-    conditions,
-  };
-}
 function eventFilterToQueryEntry(
-  filter: SorobanEventFilter,
+  filter: StellarEventFilter,
   dsOptions: SubqlStellarProcessorOptions | SubqlStellarProcessorOptions[],
 ): DictionaryQueryEntry {
   const queryAddressLimit = yargsOptions.argv['query-address-limit'];
@@ -105,9 +71,7 @@ function eventFilterToQueryEntry(
   const conditions: DictionaryQueryCondition[] = [];
 
   if (Array.isArray(dsOptions)) {
-    const addresses = dsOptions
-      .map((option) => option.address)
-      .filter((address): address is string => !!address);
+    const addresses = dsOptions.map((option) => option.address).filter((address): address is string => !!address);
 
     if (addresses.length > queryAddressLimit) {
       logger.warn(
@@ -159,9 +123,7 @@ type GroupedSubqlProjectDs = SubqlDatasource & {
   groupedOptions?: SubqlStellarProcessorOptions[];
 };
 
-export function buildDictionaryQueryEntries(
-  dataSources: SubqlDatasource[],
-): DictionaryV1QueryEntry[] {
+export function buildDictionaryQueryEntries(dataSources: SubqlDatasource[]): DictionaryV1QueryEntry[] {
   const queryEntries: DictionaryQueryEntry[] = [];
 
   for (const ds of dataSources) {
@@ -190,19 +152,10 @@ export function buildDictionaryQueryEntries(
           }
           break;
         }
-        case StellarHandlerKind.Effects: {
-          const filter = handler.filter as StellarEffectFilter;
-          if (filter.account || filter.type) {
-            queryEntries.push(effectFilterToQueryEntry(filter));
-          } else {
-            return [];
-          }
-          break;
-        }
         // TODO, event is not provided in current dictionary,
         //  https://github.com/subquery/stellar-subql-dictionaries/blob/main/schema.graphql
         case StellarHandlerKind.Event: {
-          const filter = handler.filter as SorobanEventFilter;
+          const filter = handler.filter as StellarEventFilter;
           if (ds.options?.address || filter.topics) {
             queryEntries.push(eventFilterToQueryEntry(filter, ds.options!));
           } else {
@@ -215,13 +168,7 @@ export function buildDictionaryQueryEntries(
     }
   }
 
-  return uniqBy(
-    queryEntries,
-    (item) =>
-      `${item.entity}|${JSON.stringify(
-        sortBy(item.conditions, (c) => c.field),
-      )}`,
-  );
+  return uniqBy(queryEntries, (item) => `${item.entity}|${JSON.stringify(sortBy(item.conditions, (c) => c.field))}`);
 }
 
 export class StellarDictionaryV1 extends DictionaryV1<SubqlStellarDataSource> {
@@ -242,20 +189,12 @@ export class StellarDictionaryV1 extends DictionaryV1<SubqlStellarDataSource> {
     dictionaryUrl: string,
     chainId?: string,
   ): Promise<StellarDictionaryV1> {
-    const dictionary = new StellarDictionaryV1(
-      project,
-      nodeConfig,
-      getDsProcessor,
-      dictionaryUrl,
-      chainId,
-    );
+    const dictionary = new StellarDictionaryV1(project, nodeConfig, getDsProcessor, dictionaryUrl, chainId);
     await dictionary.init();
     return dictionary;
   }
 
-  buildDictionaryQueryEntries(
-    dataSources: SubqlStellarDataSource[],
-  ): DictionaryV1QueryEntry[] {
+  buildDictionaryQueryEntries(dataSources: SubqlStellarDataSource[]): DictionaryV1QueryEntry[] {
     return buildDictionaryQueryEntries(dataSources);
   }
 }

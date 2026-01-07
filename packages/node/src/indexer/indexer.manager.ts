@@ -1,8 +1,8 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import { Inject, Injectable } from '@nestjs/common';
-import { Horizon } from '@stellar/stellar-sdk';
+import {Inject, Injectable} from '@nestjs/common';
+import {rpc} from '@stellar/stellar-sdk';
 import {
   isCustomDs,
   isRuntimeDs,
@@ -13,9 +13,7 @@ import {
   isBlockHandlerProcessor,
   isTransactionHandlerProcessor,
   isOperationHandlerProcessor,
-  isEffectHandlerProcessor,
   isEventHandlerProcessor,
-  isSorobanTransactionHandlerProcessor,
 } from '@subql/common-stellar';
 import {
   NodeConfig,
@@ -24,7 +22,6 @@ import {
   IndexerSandbox,
   ProcessBlockResponse,
   BaseIndexerManager,
-  ApiService,
   IBlock,
   SandboxService,
   DsProcessorService,
@@ -34,20 +31,18 @@ import {
 import {
   StellarBlockWrapper,
   SubqlDatasource,
-  StellarTransaction,
-  StellarOperation,
-  StellarEffect,
-  StellarBlock,
   StellarBlockFilter,
   StellarTransactionFilter,
   StellarOperationFilter,
-  StellarEffectFilter,
-  SorobanEvent,
-  SorobanEventFilter,
+  StellarEventFilter,
+  StellarEvent,
+  StellarOperation,
+  StellarTransaction,
+  StellarBlock,
 } from '@subql/types-stellar';
-import { BlockchainService } from '../blockchain.service';
-import { StellarApi, StellarApiService } from '../stellar';
-import { StellarBlockWrapped } from '../stellar/block.stellar';
+import {BlockchainService} from '../blockchain.service';
+import {StellarApi, StellarApiService} from '../stellar';
+import {StellarBlockWrapped} from '../stellar/block.stellar';
 import SafeStellarProvider from '../stellar/safe-api';
 
 const logger = getLogger('indexer');
@@ -95,52 +90,57 @@ export class IndexerManager extends BaseIndexerManager<
     block: IBlock<StellarBlockWrapper>,
     dataSources: SubqlStellarDataSource[],
   ): Promise<ProcessBlockResponse> {
-    return super.internalIndexBlock(block, dataSources, () =>
-      this.getApi(block.block),
-    );
+    return super.internalIndexBlock(block, dataSources, () => this.getApi(block.block));
   }
 
-  protected getDsProcessor(
-    ds: SubqlStellarDataSource,
-    safeApi: SafeStellarProvider,
-  ): IndexerSandbox {
+  protected getDsProcessor(ds: SubqlStellarDataSource, safeApi: SafeStellarProvider): IndexerSandbox {
     // Expand on the type here to allow for extra injections, we also change the unsafeApi type
-    const sandbox = this.sandboxService as unknown as SandboxService<
-      SafeStellarProvider | null,
-      Horizon.Server
-    >;
-    return sandbox.getDsProcessor(ds, safeApi, this.apiService.unsafeApi.api, {
-      unsafeSorobanApi: this.nodeConfig.unsafe
-        ? this.apiService.unsafeApi.sorobanClient
-        : undefined,
-    });
+    const sandbox = this.sandboxService as unknown as SandboxService<SafeStellarProvider | null, rpc.Server>;
+    return sandbox.getDsProcessor(ds, safeApi, this.apiService.unsafeApi.rpcClient);
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  private async getApi(
-    block: StellarBlockWrapper,
-  ): Promise<SafeStellarProvider | null> {
+  private async getApi(block: StellarBlockWrapper): Promise<SafeStellarProvider | null> {
     // return this.apiService.safeApi(block.block.sequence);
     return null;
   }
 
   protected async indexBlockData(
-    { block, transactions }: StellarBlockWrapper,
+    {block, transactions}: StellarBlockWrapper,
     dataSources: SubqlDatasource[],
     getVM: (d: SubqlDatasource) => Promise<IndexerSandbox>,
   ): Promise<void> {
     await this.indexBlockContent(block, dataSources, getVM);
 
+    const groupedOperations = block.operations.reduce((acc, op) => {
+      acc[op.transaction.tx.txHash] ??= [];
+      acc[op.transaction.tx.txHash].push(op);
+
+      return acc;
+    }, {} as Record<string, StellarOperation[]>);
+
+    const groupedEvents = block.events.reduce((acc, evt) => {
+      acc[evt.event.txHash] ??= [];
+      acc[evt.event.txHash].push(evt);
+
+      return acc;
+    }, {} as Record<string, StellarEvent[]>);
+
     for (const tx of transactions) {
       await this.indexTransaction(tx, dataSources, getVM);
 
-      for (const operation of tx.operations) {
+      const operationEvents = (groupedEvents[tx.tx.txHash] ?? []).reduce((acc, evt) => {
+        acc[evt.event.operationIndex] ??= [];
+        acc[evt.event.operationIndex].push(evt);
+
+        return acc;
+      }, {} as Record<string, StellarEvent[]>);
+
+      for (const [index, operation] of Object.entries(groupedOperations[tx.tx.txHash])) {
         await this.indexOperation(operation, dataSources, getVM);
 
-        for (const effect of operation.effects) {
-          await this.indexEffect(effect, dataSources, getVM);
-        }
-        for (const event of operation.events) {
+        const events = operationEvents[index] ?? [];
+        for (const event of events) {
           await this.indexEvent(event, dataSources, getVM);
         }
       }
@@ -163,25 +163,7 @@ export class IndexerManager extends BaseIndexerManager<
     getVM: (d: SubqlDatasource) => Promise<IndexerSandbox>,
   ): Promise<void> {
     for (const ds of dataSources) {
-      await this.indexData(
-        StellarHandlerKind.Transaction,
-        transaction,
-        ds,
-        getVM,
-      );
-
-      if (
-        transaction.operations.some(
-          (op) => op.type.toString() === 'invoke_host_function',
-        )
-      ) {
-        await this.indexData(
-          StellarHandlerKind.SorobanTransaction,
-          transaction,
-          ds,
-          getVM,
-        );
-      }
+      await this.indexData(StellarHandlerKind.Transaction, transaction, ds, getVM);
     }
   }
 
@@ -195,18 +177,8 @@ export class IndexerManager extends BaseIndexerManager<
     }
   }
 
-  private async indexEffect(
-    effect: StellarEffect,
-    dataSources: SubqlDatasource[],
-    getVM: (d: SubqlDatasource) => Promise<IndexerSandbox>,
-  ): Promise<void> {
-    for (const ds of dataSources) {
-      await this.indexData(StellarHandlerKind.Effects, effect, ds, getVM);
-    }
-  }
-
   private async indexEvent(
-    event: SorobanEvent,
+    event: StellarEvent,
     dataSources: SubqlDatasource[],
     getVM: (d: SubqlDatasource) => Promise<IndexerSandbox>,
   ): Promise<void> {
@@ -215,11 +187,7 @@ export class IndexerManager extends BaseIndexerManager<
     }
   }
 
-  protected async prepareFilteredData<T = any>(
-    kind: StellarHandlerKind,
-    data: T,
-    ds: SubqlDatasource,
-  ): Promise<T> {
+  protected async prepareFilteredData<T = any>(kind: StellarHandlerKind, data: T, ds: SubqlDatasource): Promise<T> {
     return Promise.resolve(data);
   }
 }
@@ -227,81 +195,30 @@ export class IndexerManager extends BaseIndexerManager<
 type ProcessorTypeMap = {
   [StellarHandlerKind.Block]: typeof isBlockHandlerProcessor;
   [StellarHandlerKind.Transaction]: typeof isTransactionHandlerProcessor;
-  [StellarHandlerKind.SorobanTransaction]: typeof isSorobanTransactionHandlerProcessor;
   [StellarHandlerKind.Operation]: typeof isOperationHandlerProcessor;
-  [StellarHandlerKind.Effects]: typeof isEffectHandlerProcessor;
   [StellarHandlerKind.Event]: typeof isEventHandlerProcessor;
 };
 
 const ProcessorTypeMap = {
   [StellarHandlerKind.Block]: isBlockHandlerProcessor,
   [StellarHandlerKind.Transaction]: isTransactionHandlerProcessor,
-  [StellarHandlerKind.SorobanTransaction]: isSorobanTransactionHandlerProcessor,
   [StellarHandlerKind.Operation]: isOperationHandlerProcessor,
-  [StellarHandlerKind.Effects]: isEffectHandlerProcessor,
   [StellarHandlerKind.Event]: isEventHandlerProcessor,
 };
 
 const FilterTypeMap = {
-  [StellarHandlerKind.Block]: (
-    data: StellarBlock,
-    filter: StellarBlockFilter,
-    ds: SubqlStellarDataSource,
-  ) =>
-    StellarBlockWrapped.filterBlocksProcessor(
-      data,
-      filter,
-      ds.options?.address,
-    ),
-
+  [StellarHandlerKind.Block]: (data: StellarBlock, filter: StellarBlockFilter, ds: SubqlStellarDataSource) =>
+    StellarBlockWrapped.filterBlocksProcessor(data, filter),
   [StellarHandlerKind.Transaction]: (
     data: StellarTransaction,
     filter: StellarTransactionFilter,
     ds: SubqlStellarDataSource,
-  ) =>
-    StellarBlockWrapped.filterTransactionProcessor(
-      data,
-      filter,
-      ds.options?.address,
-    ),
-
-  [StellarHandlerKind.SorobanTransaction]: (
-    data: StellarTransaction,
-    filter: StellarTransactionFilter,
-    ds: SubqlStellarDataSource,
-  ) =>
-    StellarBlockWrapped.filterTransactionProcessor(
-      data,
-      filter,
-      ds.options?.address,
-    ),
-
+  ) => StellarBlockWrapped.filterTransactionProcessor(data, filter, ds.options?.address),
   [StellarHandlerKind.Operation]: (
     data: StellarOperation,
     filter: StellarOperationFilter,
     ds: SubqlStellarDataSource,
-  ) =>
-    StellarBlockWrapped.filterOperationProcessor(
-      data,
-      filter,
-      ds.options?.address,
-    ),
-
-  [StellarHandlerKind.Effects]: (
-    data: StellarEffect,
-    filter: StellarEffectFilter,
-    ds: SubqlStellarDataSource,
-  ) =>
-    StellarBlockWrapped.filterEffectProcessor(
-      data,
-      filter,
-      ds.options?.address,
-    ),
-
-  [StellarHandlerKind.Event]: (
-    data: SorobanEvent,
-    filter: SorobanEventFilter,
-    ds: SubqlStellarDataSource,
-  ) =>
+  ) => StellarBlockWrapped.filterOperationProcessor(data, filter),
+  [StellarHandlerKind.Event]: (data: StellarEvent, filter: StellarEventFilter, ds: SubqlStellarDataSource) =>
     StellarBlockWrapped.filterEventProcessor(data, filter, ds.options?.address),
 };

@@ -1,9 +1,7 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import assert from 'assert';
-import { Injectable } from '@nestjs/common';
-import { validateSemver } from '@subql/common';
+import {Injectable} from '@nestjs/common';
 import {
   StellarProjectNetworkConfig,
   parseStellarProjectManifest,
@@ -12,8 +10,8 @@ import {
   isRuntimeDs,
   SubqlStellarDataSource,
 } from '@subql/common-stellar';
-import { CronFilter, BaseSubqueryProject } from '@subql/node-core';
-import { Reader } from '@subql/types-core';
+import {CronFilter, BaseSubqueryProject} from '@subql/node-core';
+import {Reader} from '@subql/types-core';
 import {
   SubqlDatasource,
   CustomDatasourceTemplate,
@@ -21,24 +19,18 @@ import {
   StellarBlockFilter,
 } from '@subql/types-stellar';
 
-const { version: packageVersion } = require('../../package.json');
+const {version: packageVersion} = require('../../package.json');
 
 export type StellarProjectDs = SubqlStellarDataSource;
 
-export type StellarProjectDsTemplate =
-  | RuntimeDatasourceTemplate
-  | CustomDatasourceTemplate;
+export type StellarProjectDsTemplate = RuntimeDatasourceTemplate | CustomDatasourceTemplate;
 
 export type SubqlProjectBlockFilter = StellarBlockFilter & CronFilter;
 
 // This is the runtime type after we have mapped genesisHash to chainId and endpoint/dict have been provided when dealing with deployments
-type NetworkConfig = StellarProjectNetworkConfig & { chainId: string };
+type NetworkConfig = StellarProjectNetworkConfig & {chainId: string};
 
-export type SubqueryProject = BaseSubqueryProject<
-  StellarProjectDs,
-  StellarProjectDsTemplate,
-  NetworkConfig
->;
+export type SubqueryProject = BaseSubqueryProject<StellarProjectDs, StellarProjectDsTemplate, NetworkConfig>;
 
 export async function createSubQueryProject(
   path: string,
@@ -63,9 +55,7 @@ export async function createSubQueryProject(
   return project;
 }
 
-export function dsHasSorobanEventHandler(
-  dataSources: SubqlDatasource[],
-): boolean {
+export function dsHasSorobanEventHandler(dataSources: SubqlDatasource[]): boolean {
   return (
     dataSources.findIndex(function (ds) {
       return (

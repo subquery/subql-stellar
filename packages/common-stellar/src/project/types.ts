@@ -16,7 +16,6 @@ export {
   StellarBlockFilter,
   StellarTransactionFilter,
   StellarOperationFilter,
-  StellarEffectFilter,
   SubqlDatasourceProcessor,
   SubqlHandlerFilter,
   StellarDatasourceKind,
@@ -27,5 +26,4 @@ export type IStellarProjectManifest = IProjectManifest<SubqlDatasource>;
 
 export interface StellarProjectNetworkConfig extends ProjectNetworkConfig {
   chainId: string;
-  sorobanEndpoint: string;
 }

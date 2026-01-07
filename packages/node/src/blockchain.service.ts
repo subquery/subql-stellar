@@ -1,38 +1,21 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import { Inject, Injectable } from '@nestjs/common';
-import { Horizon } from '@stellar/stellar-sdk';
-import {
-  isCustomDs,
-  isRuntimeDs,
-  StellarRuntimeDataSourceImpl,
-} from '@subql/common-stellar';
-import {
-  DatasourceParams,
-  Header,
-  IBlock,
-  IBlockchainService,
-} from '@subql/node-core';
-import {
-  StellarBlockWrapper,
-  StellarHandlerKind,
-  SubqlCustomDatasource,
-  SubqlCustomHandler,
-  SubqlDatasource,
-  SubqlMapping,
-} from '@subql/types-stellar';
-import { plainToClass } from 'class-transformer';
-import { validateSync } from 'class-validator';
-import { SubqueryProject } from './configure/SubqueryProject';
-import { getBlockSize } from './indexer/types';
-import { IIndexerWorker } from './indexer/worker/worker';
-import { StellarApiService } from './stellar';
+import {Inject, Injectable} from '@nestjs/common';
+import {isCustomDs, isRuntimeDs, StellarRuntimeDataSourceImpl} from '@subql/common-stellar';
+import {DatasourceParams, Header, IBlock, IBlockchainService} from '@subql/node-core';
+import {StellarBlockWrapper, StellarHandlerKind, SubqlCustomDatasource, SubqlDatasource} from '@subql/types-stellar';
+import {plainToClass} from 'class-transformer';
+import {validateSync} from 'class-validator';
+import {SubqueryProject} from './configure/SubqueryProject';
+import {getBlockSize} from './indexer/types';
+import {IIndexerWorker} from './indexer/worker/worker';
+import {StellarApiService} from './stellar';
 import SafeStellarProvider from './stellar/safe-api';
-import { calcInterval, stellarBlockToHeader } from './stellar/utils.stellar';
+import {calcInterval, stellarBlockToHeader} from './stellar/utils.stellar';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { version: packageVersion } = require('../package.json');
+const {version: packageVersion} = require('../package.json');
 
 const BLOCK_TIME_VARIANCE = 5000;
 const INTERVAL_PERCENT = 0.9;
@@ -57,16 +40,14 @@ export class BlockchainService
 
   constructor(@Inject('APIService') private apiService: StellarApiService) {}
 
-  async fetchBlocks(
-    blockNums: number[],
-  ): Promise<IBlock<StellarBlockWrapper>[]> {
+  async fetchBlocks(blockNums: number[]): Promise<IBlock<StellarBlockWrapper>[]> {
     return this.apiService.fetchBlocks(blockNums);
   }
 
   async fetchBlockWorker(
     worker: IIndexerWorker,
     blockNum: number,
-    context: { workers: IIndexerWorker[] },
+    context: {workers: IIndexerWorker[]},
   ): Promise<Header> {
     return worker.fetchBlock(blockNum, 0 /* Not used by stellar*/);
   }
@@ -97,15 +78,20 @@ export class BlockchainService
   }
 
   async getHeaderForHeight(height: number): Promise<Header> {
-    const res = await this.apiService.api.api.ledgers().ledger(height).call();
-    return stellarBlockToHeader(res as any);
+    const res = await this.apiService.api.rpcClient.getLedgers({
+      startLedger: height,
+      pagination: {
+        limit: 1,
+      },
+    });
+    if (!res.ledgers[0]) {
+      throw new Error(`Failed to get ledger for sequence ${height}`);
+    }
+    return stellarBlockToHeader(res.ledgers[0]);
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  async updateDynamicDs(
-    params: DatasourceParams,
-    dsObj: SubqlDatasource | SubqlCustomDatasource,
-  ): Promise<void> {
+  async updateDynamicDs(params: DatasourceParams, dsObj: SubqlDatasource | SubqlCustomDatasource): Promise<void> {
     if (isCustomDs(dsObj)) {
       dsObj.processor.options = {
         ...dsObj.processor.options,
@@ -125,11 +111,7 @@ export class BlockchainService
         forbidNonWhitelisted: false,
       });
       if (errors.length) {
-        throw new Error(
-          `Dynamic ds is invalid\n${errors
-            .map((e) => e.toString())
-            .join('\n')}`,
-        );
+        throw new Error(`Dynamic ds is invalid\n${errors.map((e) => e.toString()).join('\n')}`);
       }
     }
   }
@@ -145,10 +127,7 @@ export class BlockchainService
   }
 
   async getBlockTimestamp(height: number): Promise<Date> {
-    const block = await this.apiService.api.api.ledgers().ledger(height).call();
-
-    return new Date(
-      (block as unknown as Horizon.ServerApi.LedgerRecord).closed_at,
-    );
+    const header = await this.getHeaderForHeight(height);
+    return header.timestamp;
   }
 }

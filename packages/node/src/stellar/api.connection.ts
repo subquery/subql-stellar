@@ -12,33 +12,18 @@ import {
   LargeResponseError,
   IBlock,
 } from '@subql/node-core';
-import {
-  StellarBlockWrapper,
-  IStellarEndpointConfig,
-} from '@subql/types-stellar';
-import { StellarApi } from './api.stellar';
+import {StellarBlockWrapper, IStellarEndpointConfig} from '@subql/types-stellar';
+import {StellarApi} from './api.stellar';
 import SafeStellarProvider from './safe-api';
-import { SorobanServer } from './soroban.server';
 
-type FetchFunc = (
-  api: StellarApi,
-  batch: number[],
-) => Promise<IBlock<StellarBlockWrapper>[]>;
+type FetchFunc = (api: StellarApi, batch: number[]) => Promise<IBlock<StellarBlockWrapper>[]>;
 
 export class StellarApiConnection
-  implements
-    IApiConnectionSpecific<
-      StellarApi,
-      SafeStellarProvider,
-      IBlock<StellarBlockWrapper>[]
-    >
+  implements IApiConnectionSpecific<StellarApi, SafeStellarProvider, IBlock<StellarBlockWrapper>[]>
 {
   readonly networkMeta: NetworkMetadataPayload;
 
-  constructor(
-    public unsafeApi: StellarApi,
-    private fetchBlocksBatches: FetchFunc,
-  ) {
+  constructor(public unsafeApi: StellarApi, private fetchBlocksBatches: FetchFunc) {
     this.networkMeta = {
       chain: unsafeApi.getChainId(),
       specName: unsafeApi.getSpecName(),
@@ -47,12 +32,11 @@ export class StellarApiConnection
   }
 
   static async create(
-    endpoint: string,
     fetchBlockBatches: FetchFunc,
-    soroban?: SorobanServer,
+    endpoint: string,
     config?: IStellarEndpointConfig,
   ): Promise<StellarApiConnection> {
-    const api = new StellarApi(endpoint, soroban, config);
+    const api = new StellarApi(endpoint, config);
 
     await api.init();
 
@@ -85,19 +69,12 @@ export class StellarApiConnection
       formatted_error = new TimeoutError(e);
     } else if (e.message.startsWith(`disconnected from `)) {
       formatted_error = new DisconnectionError(e);
-    } else if (
-      e.message.includes(`Rate Limit Exceeded`) ||
-      e.message.includes('Too Many Requests')
-    ) {
+    } else if (e.message.includes(`Rate Limit Exceeded`) || e.message.includes('Too Many Requests')) {
       formatted_error = new RateLimitError(e);
     } else if (e.message.includes(`limit must not exceed`)) {
       formatted_error = new LargeResponseError(e);
     } else {
-      formatted_error = new ApiConnectionError(
-        e.name,
-        e.message,
-        ApiErrorType.Default,
-      );
+      formatted_error = new ApiConnectionError(e.name, e.message, ApiErrorType.Default);
     }
     return formatted_error;
   }

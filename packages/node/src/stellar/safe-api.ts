@@ -1,23 +1,12 @@
 // Copyright 2020-2025 SubQuery Pte Ltd authors & contributors
 // SPDX-License-Identifier: GPL-3.0
 
-import {
-  Account,
-  Address,
-  Contract,
-  FeeBumpTransaction,
-  Transaction,
-  xdr,
-  rpc,
-} from '@stellar/stellar-sdk';
-import { getLogger } from '@subql/node-core';
-
-// import { Durability } from 'soroban-client/lib/server';
-import { SorobanServer } from './soroban.server';
+import {Account, Address, Contract, FeeBumpTransaction, Transaction, xdr, rpc} from '@stellar/stellar-sdk';
+import {getLogger} from '@subql/node-core';
 
 const logger = getLogger('safe.api.stellar');
 
-export default class SafeStellarProvider extends SorobanServer {
+export default class SafeStellarProvider extends rpc.Server {
   private blockHeight: number;
   private baseApi: rpc.Server;
 
@@ -48,9 +37,7 @@ export default class SafeStellarProvider extends SorobanServer {
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/require-await
-  async getLedgerEntries(
-    keys: xdr.LedgerKey[],
-  ): Promise<rpc.Api.GetLedgerEntriesResponse> {
+  async getLedgerEntries(keys: xdr.LedgerKey[]): Promise<rpc.Api.GetLedgerEntriesResponse> {
     throw new Error('Method getLedgerEntries is not implemented.');
   }
 
@@ -59,12 +46,16 @@ export default class SafeStellarProvider extends SorobanServer {
     throw new Error('Method getTransaction is not implemented.');
   }
 
-  async getEvents(
-    request: rpc.Server.GetEventsRequest,
-  ): Promise<rpc.Api.GetEventsResponse> {
+  async getEvents(request: rpc.Server.GetEventsRequest): Promise<rpc.Api.GetEventsResponse> {
+    if (request.cursor) {
+      return this.baseApi.getEvents(request);
+    }
+
+    const {cursor, ...rest} = request;
     return this.baseApi.getEvents({
+      ...rest,
       startLedger: this.blockHeight,
-      filters: [],
+      endLedger: Math.max(this.blockHeight, request.endLedger!),
     });
   }
 
@@ -86,24 +77,17 @@ export default class SafeStellarProvider extends SorobanServer {
   }
 
   //eslint-disable-next-line @typescript-eslint/require-await
-  async prepareTransaction(
-    transaction: Transaction | FeeBumpTransaction,
-  ): Promise<Transaction> {
+  async prepareTransaction(transaction: Transaction | FeeBumpTransaction): Promise<Transaction> {
     throw new Error('Method prepareTransaction is not implemented.');
   }
 
   //eslint-disable-next-line @typescript-eslint/require-await
-  async sendTransaction(
-    transaction: Transaction | FeeBumpTransaction,
-  ): Promise<rpc.Api.SendTransactionResponse> {
+  async sendTransaction(transaction: Transaction | FeeBumpTransaction): Promise<rpc.Api.SendTransactionResponse> {
     throw new Error('Method sendTransaction is not implemented.');
   }
 
   //eslint-disable-next-line @typescript-eslint/require-await
-  async requestAirdrop(
-    address: string | Pick<Account, 'accountId'>,
-    friendbotUrl?: string,
-  ): Promise<Account> {
+  async requestAirdrop(address: string | Pick<Account, 'accountId'>, friendbotUrl?: string): Promise<Account> {
     throw new Error('Method requestAirdrop is not implemented.');
   }
 }

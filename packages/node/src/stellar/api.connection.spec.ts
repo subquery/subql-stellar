@@ -9,50 +9,40 @@ import {
   RateLimitError,
   TimeoutError,
 } from '@subql/node-core';
-import { StellarBlock, StellarBlockWrapper } from '@subql/types-stellar';
-import { StellarApiConnection } from './api.connection';
-import { StellarApi } from './api.stellar';
-import { SorobanServer } from './soroban.server';
+import {StellarBlock, StellarBlockWrapper} from '@subql/types-stellar';
+import {StellarApiConnection} from './api.connection';
+import {StellarApi} from './api.stellar';
 
-const HTTP_ENDPOINT = 'https://horizon-futurenet.stellar.org';
 const SOROBAN_ENDPOINT = 'https://rpc-futurenet.stellar.org';
 
 describe('StellarApiConnection', () => {
   let apiConnection: StellarApiConnection;
   let unsafeApi: StellarApi;
-  let sorobanApi: SorobanServer;
   const mockBlocks: StellarBlockWrapper[] = [
     {
-      block: { sequence: 1, hash: 'hash1' } as unknown as StellarBlock,
+      block: {sequence: 1, hash: 'hash1'} as unknown as StellarBlock,
       transactions: [],
       operations: [],
-      effects: [],
+      events: [],
     },
     {
-      block: { sequence: 2, hash: 'hash2' } as unknown as StellarBlock,
+      block: {sequence: 2, hash: 'hash2'} as unknown as StellarBlock,
       transactions: [],
       operations: [],
-      effects: [],
+      events: [],
     },
   ];
 
   const fetchBlockBatches = jest.fn().mockResolvedValue(mockBlocks);
 
   beforeEach(async () => {
-    sorobanApi = new SorobanServer(SOROBAN_ENDPOINT);
-    unsafeApi = new StellarApi(HTTP_ENDPOINT, sorobanApi);
+    unsafeApi = new StellarApi(SOROBAN_ENDPOINT);
     await unsafeApi.init();
     apiConnection = new StellarApiConnection(unsafeApi, fetchBlockBatches);
   });
 
   it('creates a connection', async () => {
-    expect(
-      await StellarApiConnection.create(
-        HTTP_ENDPOINT,
-        fetchBlockBatches,
-        sorobanApi,
-      ),
-    ).toBeInstanceOf(StellarApiConnection);
+    expect(await StellarApiConnection.create(fetchBlockBatches, SOROBAN_ENDPOINT)).toBeInstanceOf(StellarApiConnection);
   });
 
   it('fetches blocks', async () => {
