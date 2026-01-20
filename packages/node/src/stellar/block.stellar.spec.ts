@@ -175,6 +175,8 @@ describe('StellarBlockWrapped', () => {
     const topic2 = nativeToScVal('topic2');
 
     const mockEvent: SorobanEvent = {
+      operationIndex: 0,
+      transactionIndex: 0,
       txHash: '',
       type: 'contract',
       ledger: null,
@@ -183,7 +185,6 @@ describe('StellarBlockWrapped', () => {
       ledgerClosedAt: '',
       contractId: new Contract(testAddress),
       id: 'mockId',
-      pagingToken: '',
       inSuccessfulContractCall: true,
       topic: [topic1, topic2],
       value: {} as xdr.ScVal,
