@@ -55,9 +55,14 @@ jobs:
       - name: Installing dependencies
         run: yarn install
 
-      - uses: artiomtr/jest-coverage-report-action@v2
+      - name: Build packages
+        run: yarn build
+
+      - name: Run tests with coverage
+        run: yarn test-jest --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          skip-step: install
-          test-script: yarn test-jest
-          annotations: none
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
