@@ -76,8 +76,10 @@ jobs:
     name: Release Publish
     needs: [pre-ci, setup]
     if: >
-      !startsWith(github.event.head_commit.message, '[SKIP CI]')
-      && startsWith(github.event.head_commit.message, '[release]')
+      (github.event_name == 'workflow_dispatch' || (
+        !startsWith(github.event.head_commit.message, '[SKIP CI]')
+        && startsWith(github.event.head_commit.message, '[release]')
+      ))
       && github.repository == 'subquery/subql-stellar'
     runs-on: ubuntu-latest
     steps:
