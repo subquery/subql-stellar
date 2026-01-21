@@ -97,12 +97,12 @@ jobs:
         run: yarn build
 
       # Publish to npm and github releases
-      - name: Publish Types
-        if: needs.setup.outputs.changed-types == 'true'
-        uses: ./.github/actions/create-release
-        with:
-          package-path: packages/types
-          repo-token: ${{ secrets.REPO_TOKEN }}
+#      - name: Publish Types
+#        if: needs.setup.outputs.changed-types == 'true'
+#        uses: ./.github/actions/create-release
+#        with:
+#          package-path: packages/types
+#          repo-token: ${{ secrets.REPO_TOKEN }}
 
       - name: Publish Common Stellar
         if: needs.setup.outputs.changed-common-stellar == 'true'

@@ -1,6 +1,5 @@
 const fs = require('fs');
 const { exit } = require('process');
-const core = require('@actions/core');
 const { request } = require('@octokit/request');
 
 const myArgs = process.argv.slice(2);
@@ -53,7 +52,8 @@ function gatherReleaseInfo(logPath) {
   }
 
   if(releaseInfo === ''){
-    core.setFailed("No release info found, either missing in changelog or changelog is formatted incorrectly")
+    console.warn("No release info found, either missing in changelog or changelog is formatted incorrectly. Skipping GitHub release.")
+    exit(0)
   }
 
   console.log("Gathered release info...")
@@ -73,7 +73,7 @@ async function publishRelease(releaseInfo) {
     target_commitish: `${myArgs[1]}`,
     body: releaseInfo
   }).catch( err => {
-    core.setFailed(err)
+    console.warn(`Failed to create GitHub release: ${err.message}. Continuing anyway...`)
   })
 
   console.log("Release Created...")
