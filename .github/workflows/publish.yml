@@ -105,14 +105,12 @@ jobs:
 #          repo-token: ${{ secrets.REPO_TOKEN }}
 
       - name: Publish Common Stellar
-        if: needs.setup.outputs.changed-common-stellar == 'true'
         uses: ./.github/actions/create-release
         with:
           package-path: packages/common-stellar
           repo-token: ${{ secrets.REPO_TOKEN }}
 
       - name: Publish Node
-        if: needs.setup.outputs.changed-node == 'true'
         uses: ./.github/actions/create-release
         with:
           package-path: packages/node
