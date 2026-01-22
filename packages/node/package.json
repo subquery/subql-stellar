@@ -30,7 +30,7 @@
     "@subql/node-core": "^18.2.0",
     "@subql/testing": "^2.2.0",
     "@subql/types-stellar": "workspace:*",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "reflect-metadata": "^0.1.13"
   },
   "peerDependencies": {
