@@ -340,6 +340,15 @@ export interface IStellarEndpointConfig extends IEndpointConfig {
    * The page limit for the number of records to fetch per request. Default value is 150
    */
   pageLimit?: number;
+
+  /**
+   * How long (in seconds) to wait for the soroban endpoint to ingest a ledger at the
+   * chain head before failing the block fetch. With hosted load-balanced RPCs the
+   * backend serving getEvents can lag the target height by a few ledgers, which would
+   * otherwise be a fatal fetch error. Default value is 600. Keep this below the
+   * `--timeout` flag (default 900s), otherwise the fetch task times out first.
+   */
+  sorobanIngestWaitSeconds?: number;
 }
 
 /**

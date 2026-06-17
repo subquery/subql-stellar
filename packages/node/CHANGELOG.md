@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Crash at the chain head when the soroban endpoint has not yet ingested the target ledger: JSON-RPC -32600 `startLedger must be within the ledger range` is now treated as a transient condition and the fetch waits for ingestion (bounded by the new `sorobanIngestWaitSeconds` endpoint config, default 600s) instead of failing fatally after retries (#167)
 
 ## [6.2.0] - 2026-01-21
 ### Changed

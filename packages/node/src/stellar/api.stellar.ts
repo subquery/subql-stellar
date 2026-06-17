@@ -3,7 +3,7 @@
 
 import assert from 'assert';
 import { Horizon, rpc } from '@stellar/stellar-sdk';
-import { getLogger, IBlock } from '@subql/node-core';
+import { delay, getLogger, IBlock } from '@subql/node-core';
 import {
   SorobanEvent,
   StellarBlock,
@@ -27,6 +27,7 @@ export class StellarApi {
 
   private chainId?: string;
   private pageLimit = DEFAULT_PAGE_SIZE;
+  private sorobanIngestWaitSeconds: number;
 
   constructor(
     private endpoint: string,
@@ -35,6 +36,7 @@ export class StellarApi {
   ) {
     const { hostname, protocol, searchParams } = new URL(this.endpoint);
     this.pageLimit = config?.pageLimit || this.pageLimit;
+    this.sorobanIngestWaitSeconds = config?.sorobanIngestWaitSeconds ?? 600;
 
     const protocolStr = protocol.replace(':', '');
 
@@ -148,6 +150,80 @@ export class StellarApi {
     }
 
     return effects;
+  }
+
+  // The target height comes from Horizon while events are fetched from a separate
+  // soroban endpoint; with hosted load-balanced RPCs the serving backend can lag the
+  // target by several ledgers, in which case stellar-rpc rejects getEvents with
+  // JSON-RPC -32600 'startLedger must be within the ledger range: X - Y' (legacy
+  // soroban-rpc: 'start is after newest ledger'). The ledger exists, it just is not
+  // ingested yet: a transient condition, not an invalid request.
+  private isLedgerNotYetIngestedError(e: any, sequence: number): boolean {
+    const message = e?.message;
+    if (typeof message !== 'string') {
+      return false;
+    }
+    if (message === 'start is after newest ledger') {
+      return true;
+    }
+    const range =
+      /startLedger must be within the ledger range: (\d+) - (\d+)/.exec(
+        message,
+      );
+    return range !== null && sequence > Number(range[2]);
+  }
+
+  // Fallback when a -32600 carries an unrecognized wording: compare the requested
+  // sequence against the soroban endpoint's own head instead of parsing the message.
+  private async isSequenceAheadOfSorobanHead(
+    e: any,
+    sequence: number,
+  ): Promise<boolean> {
+    if (e?.code !== -32600) {
+      return false;
+    }
+    try {
+      const latest = await this.sorobanClient.getLatestLedger();
+      return sequence > latest.sequence;
+    } catch {
+      return false;
+    }
+  }
+
+  private async getEventsWhenIngested(
+    sequence: number,
+  ): Promise<SorobanEvent[]> {
+    const deadline = Date.now() + this.sorobanIngestWaitSeconds * 1000;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.getAndWrapEvents(sequence);
+      } catch (e: any) {
+        if (e?.message === 'start is before oldest ledger') {
+          throw new Error(`The requested events for ledger number ${sequence} is not available on the current soroban node.
+                This is because you're trying to access a ledger that is older than the oldest ledger stored in this node.
+                To resolve this issue, you can either:
+                1. Increase the start ledger to a more recent one, or
+                2. Connect to a different node that might have a longer history of ledgers.`);
+        }
+        const notYetIngested =
+          this.isLedgerNotYetIngestedError(e, sequence) ||
+          (await this.isSequenceAheadOfSorobanHead(e, sequence));
+        if (!notYetIngested || Date.now() >= deadline) {
+          if (e?.code === -32600) {
+            logger.warn(
+              `Giving up on events for ledger ${sequence} after JSON-RPC -32600: ${e.message}`,
+            );
+          }
+          throw e;
+        }
+        if (attempt === 1 || attempt % 10 === 0) {
+          logger.warn(
+            `Events for ledger ${sequence} are not yet ingested by the soroban endpoint ("${e.message}"), waiting for it to catch up (attempt ${attempt})`,
+          );
+        }
+        await delay(6);
+      }
+    }
   }
 
   async getAndWrapEvents(height: number): Promise<SorobanEvent[]> {
@@ -306,27 +382,7 @@ export class StellarApi {
     );
 
     if (this.sorobanClient && hasInvokeHostFunctionOp) {
-      try {
-        eventsForSequence = await this.getAndWrapEvents(sequence);
-      } catch (e: any) {
-        if (e.message === 'start is after newest ledger') {
-          const latestLedger = (await this.sorobanClient.getLatestLedger())
-            .sequence;
-          throw new Error(`The requested events for ledger number ${sequence} is not available on the current soroban node.
-                This is because you're trying to access a ledger that is after the latest ledger number ${latestLedger} stored in this node.
-                To resolve this issue, please check you endpoint node start height`);
-        }
-
-        if (e.message === 'start is before oldest ledger') {
-          throw new Error(`The requested events for ledger number ${sequence} is not available on the current soroban node.
-                This is because you're trying to access a ledger that is older than the oldest ledger stored in this node.
-                To resolve this issue, you can either:
-                1. Increase the start ledger to a more recent one, or
-                2. Connect to a different node that might have a longer history of ledgers.`);
-        }
-
-        throw e;
-      }
+      eventsForSequence = await this.getEventsWhenIngested(sequence);
     }
 
     const wrappedLedger: StellarBlock = {
